@@ -1,0 +1,35 @@
+.App {
+  font-size: 10px;
+}
+
+.pattern {
+  max-width: 1000;
+}
+
+.part {
+
+}
+
+.part-pads-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.part-details {
+  background: yellow;
+  height: 99px;
+}
+
+.step {
+  outline: 0;
+  text-align: center;
+  min-width: 32px;
+  max-width: 32px;
+  height: 32px;
+  border: 1px solid rgb(120, 0, 150);
+  margin: 1px;
+}
+
+.step:hover {
+  background: wheat;
+}
