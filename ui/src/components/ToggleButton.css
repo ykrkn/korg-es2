@@ -1,0 +1,16 @@
+.ToggleButton {
+    line-height: 10px;
+    outline: 0;
+    text-align: center;
+    min-width: 32px;
+    max-width: 32px;
+    height: 40px;
+    border: 1px solid rgb(76, 100, 96);
+    margin: 1px;
+    background: #2c3534;   
+}
+
+.ToggleButton.selected {
+    border: 1px solid rgb(100, 133, 127);
+    background: #4c5c5a;   
+}

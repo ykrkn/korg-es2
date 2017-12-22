@@ -2,4 +2,10 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
+  font-size: 10px;
+  background: #292c27;
+}
+
+* {
+  color: #f0f0f0;
 }

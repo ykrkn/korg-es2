@@ -1,18 +1,10 @@
 import React, { Component } from 'react';
+import ToggleButton from './ToggleButton';
+import './Step.css';
 
-export default class Pad extends Component {
+export default class Step extends ToggleButton {
     constructor(props) {
         super(props);
         this.state = {};
-    }
-
-    componentDidMount() {
-    }
-
-    componentWillUnmount() {
-    }
-
-    render() {
-        return <button className="step">X</button>;
     }
 }

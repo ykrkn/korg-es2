@@ -1,0 +1,15 @@
+.Step {
+    line-height: 10px;
+    outline: 0;
+    text-align: center;
+    min-width: 40px;
+    max-width: 40px;
+    height: 40px;
+    border: 1px solid rgb(96, 126, 121);
+    margin: 1px;
+    background: #3b4645;
+  }
+  
+  .Step:hover {
+    background: rgb(88, 105, 110);
+  }

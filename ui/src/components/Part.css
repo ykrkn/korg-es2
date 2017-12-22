@@ -1,0 +1,13 @@
+.Part {
+
+}
+
+.part-pads-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.part-details {
+  background: rgb(75, 75, 1);
+  height: 99px;
+}

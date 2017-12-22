@@ -1,20 +1,18 @@
 import React, { Component } from 'react';
+import A from './A';
 import Part from './Part';
+import MotionSeq from './MotionSeq';
+import './Pattern.css';
 
-export default class Pattern extends Component {
+export default class Pattern extends A {
     constructor(props) {
         super(props);
         this.state = {};
     }
 
-    componentDidMount() {
-    }
-
-    componentWillUnmount() {
-    }
-
     render() {
         const parts = Array(16).fill(0).map(e => <Part />);
-        return <div className="pattern">{parts}</div>;
+        const mseqs = Array(24).fill(0).map(e => <MotionSeq />);
+        return <div className="Pattern">{parts} {mseqs}</div>;
     }
 }
