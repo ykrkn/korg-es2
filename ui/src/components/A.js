@@ -7,7 +7,7 @@ export default class A extends Component {
     }
 
     componentDidMount() {
-        console.log(this, 'Mount');
+        //console.log(this, 'Mount');
     }
 
     componentWillUnmount() {

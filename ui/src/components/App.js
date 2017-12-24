@@ -10,15 +10,14 @@ class App extends Component {
     this.state = {};
   }
 
-  componentDidMount() {
-  }
-
-  componentWillUnmount() {
-  }
-
   render() {
+    const _onMouseMove = (e) => { 
+      window.mx = e.clientX; 
+      window.my = e.clientY; 
+    }
+    
     return (
-      <div className="App">
+      <div className="App" onMouseMove={_onMouseMove}>
         <header className="App-header"></header>
         <Pattern />
       </div>
