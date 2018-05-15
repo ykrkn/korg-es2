@@ -1,7 +1,6 @@
 package com.ykrkn.electribe;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 /*
 TABLE 1 : Pattern Parameter ( 1 Pattern, Current Pattern )
@@ -122,111 +121,75 @@ TABLE 4 : Master Fx Paramter
 */
 
 public class Pattern extends ESObject {
-    int size;
-    byte[] version;
-    String patternName;
-    short tempo10x;
-    byte swing;
-    byte length;
-    byte beat;
-    byte key;
-    byte scale;
-    byte chordset;
-    byte playLevel;
 
-    byte gateArpPattern;
-    byte gateArpSpeed;
-    short gateArpTime;
+    Parameter[] parameters = new Parameter[] {
+        Parameter.stringParameter("header", 0, 4),
+        Parameter.intParameter("size", 4),
+        Parameter.byteArrayParameter("version", 12, 2),
+        Parameter.stringParameter("patternName", 16, 17),
+        Parameter.shortParameter("tempo10x", 34),
+        Parameter.byteParameter("swing", 36),
+        Parameter.byteParameter("length", 37),
+        Parameter.byteParameter("beat", 38),
+        Parameter.byteParameter("key", 39),
+        Parameter.byteParameter("scale", 40),
+        Parameter.byteParameter("chordset", 41),
+        Parameter.byteParameter("playLevel", 42),
 
-    byte masterFxType;
-    byte masterFxPadX;
-    byte masterFxPadY;
-    byte masterFxHold;
-    byte alt1314;
-    byte alt1516;
+        // touch scale offset = 44
+        Parameter.byteParameter("gateArpPattern", 44+5),
+        Parameter.byteParameter("gateArpSpeed", 44+6),
+        // TODO: check gateArpTime! should be -100 ~ 100
+        Parameter.shortParameter("gateArpTime", 44+8),
+
+        // Master Fx offset = 60
+        Parameter.byteParameter("masterFxType", 61),
+        Parameter.byteParameter("masterFxPadX", 62),
+        Parameter.byteParameter("masterFxPadY", 63),
+        Parameter.byteParameter("masterFxHold", 65),
+        Parameter.byteParameter("alt1314", 68),
+        Parameter.byteParameter("alt1516", 69),
+        // TODO: motion seq here
+        Parameter.stringParameter("footer", 15356, 4)
+    };
+
     Part[] parts = new Part[Constants.PARTS_COUNT];
 
-    void readFromBuffer(ByteBuffer buffer) {
-        this.buffer = buffer;
-        buffer.rewind();
-
-        String header = new String(read(0, 3));
-        if(!Constants.PATTERN_HEADER.equals(header)) {
-            throw new RuntimeException("Invalid patter block header " + header);
+    public void readFromByteArray(byte[] data) {
+        for (Parameter parameter : parameters) {
+            parameter.readFromSource(data);
         }
 
-        size = bytea2int(read(4, 7));
-        read(8, 11);
-        version = read(12, 13);
-        read(14, 15);
-        patternName = bytea2str(read(16, 33));
-        tempo10x = bytea2short(read(34, 35));
-        swing = readByte(36);
-        length = readByte(37);
-        beat = readByte(38);
-        key = readByte(39);
-        scale = readByte(40);
-        chordset = readByte(41);
-        playLevel = readByte(42);
-        readByte(43);
+//        // parts
+//        for (int i = 0; i < Constants.PARTS_COUNT; i++) {
+//            byte[] partBA = new byte[Constants.PART_BLOCK_SIZE];
+//            buffer.get(partBA);
+//            ByteBuffer partBuffer = ByteBuffer.wrap(partBA);
+//            Part p = new Part(i);
+//            p.readFromBuffer(partBuffer);
+//            parts[i] = p;
+//        }
+//
 
-        // touch scale
-        int off = buffer.position();
-        read(off, off+4);
-        gateArpPattern = readByte(off+5);
-        gateArpSpeed = readByte(off+6);
-        readByte(off+7);
-        // TODO: check gateArpTime! should be -100 ~ 100
-        gateArpTime = bytea2short(read(off+8, off+9));
-        read(off+10, off+15);
 
-        // Master Fx
-        off = buffer.position();
-        readByte(off);
-        masterFxType = readByte(off+1);
-        masterFxPadX = readByte(off+2);
-        masterFxPadY = readByte(off+3);
-        readByte(off+4);
-        masterFxHold = readByte(off+5);
-        read(off+6, off+7);
+        //        if(!Constants.PATTERN_HEADER.equals(header)) {
+//            throw new RuntimeException("Invalid patter block header " + header);
+//        }
 
-        alt1314 = readByte(68);
-        alt1516 = readByte(69);
-        read(70, 77);
-        read(78, 255);
+//        if(!Constants.PATTERN_FOOTER.equals(footer)) {
+//            throw new RuntimeException("Invalid pattern block footer " + footer);
+//        }
 
-        // TODO: motion seq here
-        off = buffer.position();
-        read(off, off+1583);
-
-        read(1840, 2047);
-
-        // parts
-        for (int i = 0; i < Constants.PARTS_COUNT; i++) {
-            byte[] partBA = new byte[Constants.PART_BLOCK_SIZE];
-            buffer.get(partBA);
-            ByteBuffer partBuffer = ByteBuffer.wrap(partBA);
-            Part p = new Part(i);
-            p.readFromBuffer(partBuffer);
-            parts[i] = p;
-        }
-
-        read(15104, 15355);
-        String footer = new String(read(15356, 15359));
-        if(!Constants.PATTERN_FOOTER.equals(footer)) {
-            throw new RuntimeException("Invalid pattern block footer " + footer);
-        }
-        read(15360, 16383);
     }
 
     @Override
     public String toString() {
         return "Pattern{" +
-                "size=" + size +
-                ", version=" + Arrays.toString(version) +
-                ", patternName='" + patternName + '\'' +
-                ", tempo10x=" + tempo10x +
-                ", length=" + length +
+                ", patternName='" + parameters[3] + '\'' +
+                ", tempo10x=" + parameters[4] +
+                ", length=" + parameters[6] +
                 '}';
     }
+
+
 }
