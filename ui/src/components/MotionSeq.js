@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
+import React from 'react';
 import A from './A';
-import Step from './Step';
+import PadButton from './PadButton';
 import ToggleButton from './ToggleButton';
 
 export default class MotionSeq extends A {
@@ -19,7 +19,7 @@ export default class MotionSeq extends A {
 
     render() {
         const { showDetails } = this.state;
-        const steps = Array(16).fill(0).map(e => <Step className="Step" />);
+        const steps = Array(16).fill(0).map(e => <PadButton className="PadButton" />);
         const partToggleOnClick = (e) => {
             this.setState({showDetails : !showDetails});    
         };

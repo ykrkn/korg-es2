@@ -9,3 +9,66 @@ body {
 * {
   color: #f0f0f0;
 }
+
+.Part {
+
+}
+
+.part-pads-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.part-details {
+  background: rgb(79, 77, 79);
+  min-height: 99px;
+  width: 570px;
+}
+
+
+.Pattern {
+  max-width: 550px;
+}
+
+
+.ToggleButton {
+  line-height: 10px;
+  outline: 0;
+  text-align: center;
+  min-width: 24px;
+  max-width: 24px;
+  height: 32px;
+  border: 1px solid rgb(79, 77, 79);
+  margin: 1px;
+  padding:0;
+  background: #2c3534;
+}
+
+.ToggleButton.selected {
+  background: rgb(79, 77, 79);
+}
+
+
+.PadButton {
+  line-height: 10px;
+  outline: 0;
+  text-align: center;
+  min-width: 32px;
+  max-width: 32px;
+  height: 32px;
+  border: 1px solid rgb(79, 77, 79);
+  margin: 1px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.PadButton.selected {
+  background: rgba(255, 0, 0, 0.3);
+}
+
+.PadButton:hover {
+  background: rgba(0, 0, 255, 0.3);
+}
+
+.PadButton.selected:hover {
+  background: rgba(255, 0, 255, 0.3);
+}

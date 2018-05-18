@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import Pattern from './Pattern';
 
-import './App.css';
-
+const
 class App extends Component {
 
   constructor(props) {
@@ -11,15 +10,10 @@ class App extends Component {
   }
 
   render() {
-    const _onMouseMove = (e) => { 
-      window.mx = e.clientX; 
-      window.my = e.clientY; 
-    }
-    
     return (
-      <div className="App" onMouseMove={_onMouseMove}>
+      <div className="App">
         <header className="App-header"></header>
-        <Pattern />
+        <Pattern payload={data}/>
       </div>
     );
   }

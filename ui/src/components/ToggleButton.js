@@ -1,38 +1,28 @@
-import React, { Component } from 'react';
+import React from 'react';
 import A from './A';
-import './ToggleButton.css';
 
 export default class ToggleButton extends A {
     constructor(props) {
         super(props);
         this.state = {
             label : this.props.label,
+            className : props.className || "ToggleButton",
             selected : this.props.selected 
         };
     }
 
     render() {
         const _onClick = (e) => {
-            const { selected } = this.state;
-            this.setState({selected : !selected}); 
-            if(this.props.onToggle)
-                this.props.onToggle(!selected);   
+            let { selected } = this.state;
+            selected = !selected;
+
+            if(this.props.onToggle) this.props.onToggle(selected);
+            let className = (this.props.className || "ToggleButton");
+            if(selected) className += " selected";
+            this.setState({selected : selected, className : className});
         };
 
-        const _onMouseDown = (e) => { 
-            // this.setState({mx : e.clientX, my : e.clientY});
-            this.onMouseMove(dx, dy);
-            setTimeout(() => {
-                this.onMouseMove(dx, dy);
-            }, 20);
-        }
-        const _onMouseUp = (e) => { console.log(e) }
-        const _onMouseMove = (e) => { console.log(e) }
-
-        const className = (this.props.className || "ToggleButton") + (this.state.selected ? " selected" : "");
-        return <button className={className} 
-            onClick={_onClick} 
-            onMouseDown={_onMouseDown} 
-            onMouseUp={_onMouseUp}>{this.state.label}</button>;
+        const { label, className } = this.state;
+        return <button className={className} onClick={_onClick}>{label}</button>;
     }
 }
