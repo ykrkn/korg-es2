@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import Pattern from './Pattern';
 
-const
+const data = {};
+
 class App extends Component {
 
   constructor(props) {
