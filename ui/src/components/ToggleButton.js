@@ -1,7 +1,6 @@
-import React from 'react';
-import A from './A';
+import React, {Component} from 'react';
 
-export default class ToggleButton extends A {
+export default class ToggleButton extends Component {
     constructor(props) {
         super(props);
         this.state = {

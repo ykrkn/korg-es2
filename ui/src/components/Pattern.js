@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
-import A from './A';
 import Part from './Part';
 import MotionSeq from './MotionSeq';
 
-export default class Pattern extends A {
+export default class Pattern extends Component {
     constructor(props) {
         super(props);
         this.state = {};

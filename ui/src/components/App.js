@@ -10,6 +10,7 @@ class App extends Component {
     super(props);
     this.state = {};
     this.service = new ES2Service();
+    this.getDataset();
   }
 
   getDataset = () => {

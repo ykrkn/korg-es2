@@ -1,9 +1,8 @@
-import React from 'react';
-import A from './A';
+import React, {Component} from 'react';
 import PadButton from './PadButton';
 import ToggleButton from './ToggleButton';
 
-export default class MotionSeq extends A {
+export default class MotionSeq extends Component {
     constructor(props) {
         super(props);
         this.state = {
