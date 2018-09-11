@@ -45,7 +45,7 @@ void print_pattern(FILE *fout, korg_e2_pattern ptn) {
 
     for(int j=0; j<16; ++j) { // parts
         if (j > 0) fprintf(fout, ",");
-        //print_part(fout, ptn.parts[j]);
+        print_part(fout, ptn.parts[j]);
     }
     fprintf(fout, "]");
     fprintf(fout, "}");
