@@ -11,12 +11,6 @@
 
 typedef unsigned char byte;
 
-// TABLE 2
-typedef struct {
-    byte major;
-    byte minor;
-    byte reserved[2];
-} korg_e2_pattern_version;
 
 // TABLE 3
 typedef struct {
@@ -96,7 +90,9 @@ typedef struct {
     byte header[4]; // 'PTST' = 54535450[HEX]
     byte size[4];
     byte reserved1[4];
-    korg_e2_pattern_version version;
+    byte version_major;
+    byte version_minor;
+    byte reserved[2];
     byte name[18]; // null terminated
     byte tempo[2]; // 200~3000 = 20.0 ~ 300.0 UInt16LE
     byte swing   ; // -48 ~ 48

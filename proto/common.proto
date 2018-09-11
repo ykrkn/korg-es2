@@ -1,0 +1,30 @@
+// protoc --java_out=out common.proto
+
+syntax = "proto3";
+
+package ykrkn.sx;
+
+message KorgES2Dump {
+	uint32 size = 1; // 250
+	repeated KorgES2Pattern patterns = 2;
+}
+
+message KorgES2Pattern {
+		
+}
+
+message Dump {
+	enum HostType {
+		UNKNOWN = 0;
+		KORG_ES2 = 1;
+	}
+	uint32 protocol_version = 1;
+	HostType host = 2;
+	string device = 3;
+	string version = 4;
+	bytes raw_data = 5;
+	oneof test_oneof {
+		KorgES2Pattern korg_es2_pattern = 10;
+		KorgES2Dump korg_es2_dump = 11;
+	}
+}
