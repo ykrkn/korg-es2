@@ -105,3 +105,31 @@ const korg_e2_pattern = [
     ['footer',4], // 'PTED' = 44455450[HEX]
     ['reserved7',1024],
 ];
+
+const traverse = (struct, offset) => {
+    console.log('s', offset);
+    for(let i=0; i<struct.length; ++i) {
+        const e = struct[i];
+        const o = {name : e[0], size : e[1], offset : offset};
+        if (e.length == 2) {
+            offset += e[1];
+            struct[i] = o;
+        } else if (e.length == 3) {
+            o.next = [];
+            let offset0 = offset;
+            for(let j=0; j<e[1]; ++j) {
+                o.next[j] = e[2];
+                offset = traverse(o.next[j], offset);
+            }
+            // LOOKATME:
+            console.log(offset-offset0);
+            offset += offset0;
+            struct[i] = o;
+        }
+    }
+    return offset;
+};
+
+traverse(korg_e2_pattern, 0);
+console.log(korg_e2_pattern);
+export default korg_e2_pattern;

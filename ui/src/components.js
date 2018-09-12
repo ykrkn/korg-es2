@@ -51,7 +51,7 @@ class Part extends Component {
 
     render() {
         const { payload, patternLength } = this.props;
-        console.log(payload);
+        //console.log(payload);
         const { showDetails } = this.state;
         const visibleSteps = payload.steps.slice(0, 16*patternLength);
         const { oscillator_type } = payload;
