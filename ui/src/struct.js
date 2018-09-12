@@ -107,24 +107,23 @@ const korg_e2_pattern = [
 ];
 
 const traverse = (struct, offset) => {
-    console.log('s', offset);
     for(let i=0; i<struct.length; ++i) {
-        const e = struct[i];
-        const o = {name : e[0], size : e[1], offset : offset};
-        if (e.length == 2) {
-            offset += e[1];
-            struct[i] = o;
-        } else if (e.length == 3) {
-            o.next = [];
-            let offset0 = offset;
-            for(let j=0; j<e[1]; ++j) {
-                o.next[j] = e[2];
-                offset = traverse(o.next[j], offset);
+        let type = struct[i];
+        if (type.length == 2) {
+            type[2] = offset;
+            offset += type[1];
+        } else if (type.length == 3) {
+            let sizeof = type[1];
+            let next_type = type[2];
+            let next_struct = [];
+            for(let j=0; j<sizeof; ++j) {
+                next_struct[j] = [ ... next_type];
             }
-            // LOOKATME:
-            console.log(offset-offset0);
-            offset += offset0;
-            struct[i] = o;
+            for(let j=0; j<sizeof; ++j) {
+                offset = traverse(next_struct, offset);
+                next_struct[j][3] = offset;
+            }
+            type[3] = next_struct;
         }
     }
     return offset;
