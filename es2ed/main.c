@@ -82,10 +82,21 @@ int main(int argc, const char * argv[]) {
     }
     fclose(fptr);
 
+    korg_e2_pattern ptn;
     fprintf(fout, "[");
     for(int i=0; i<PATTERNS_COUNT; ++i) {
+        ptn = p[i];
         if (i > 0) fprintf(fout, ",");
-        print_pattern(fout, p[i]);
+        // print_pattern(fout, p[i]);
+
+        fprintf(fout, "[");
+        byte *a = &(ptn);
+        for(int j=0; j<PATTERN_SIZE; ++j) {
+            if(j>0) fprintf(fout, ",");
+            fprintf(fout, "%d", *(a+j));    
+        }
+        fprintf(fout, "]\n");
+
     }
     fprintf(fout, "]\n");
     fclose(fout);

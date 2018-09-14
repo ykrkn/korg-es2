@@ -106,25 +106,137 @@ const korg_e2_pattern = [
     ['reserved7',1024],
 ];
 
-const multiplyType = (type) => {
-    const res = [];
-    for(let i=0; i<type.length; ++i) {
-        const prop = type[i];
-        if (prop.length == 3) {
-            const next = [];
-            for(let j=0; j<prop[1]; j++) {
-                next.push([...prop[2]]);
-            }
-            prop[2] = next.map(multiplyType);
+const stringConverter = {
+    unpack : (v) => {
+        let r = "";
+        for(let i=0; i<v.length; ++i) {
+            if (v[i] == 0) break;
+            r += String.fromCharCode(v[i]);        
         }
-        res.push([...prop]);
+        return r;
+    },
+    pack : (v) => {
+        let r = new Array(18).fill(0); // FIXME:
+        for(let i=0; i<v.length; ++i) {
+            r[i] = v.codePointAt(i);
+        }
+        return r;        
     }
-    return res;
 };
 
+const converters = {
+    'header' : stringConverter,
+    'footer' : stringConverter,
+    'name' : stringConverter
+};
 
-const struct = multiplyType(korg_e2_pattern);
+const DUMP_SIZE = 16384;
 
-console.log(struct);
+class Dump { 
 
-export default struct;
+    constructor(struct) {
+        this.data = new Array(DUMP_SIZE).fill(0);
+        this.struct = this.multiplyType(struct);
+        const offset = this.calcOffset(this.struct, 0);
+        if (offset != DUMP_SIZE) throw new Error('Invalid struct size ' + offset);
+        this.struct = this.buildAccessor(this.struct, { _ : this.struct});
+    }
+
+    import(data) {
+        if (!Array.isArray(data)) { console.error('Invalid data'); return; }
+        if (data.length != DUMP_SIZE) { console.error('Invalid data size'); return; }
+        this.data = data;
+    }
+
+    export() {
+        return this.data;
+    }
+
+    multiplyType = (type) => {
+        const res = [];
+        for(let i=0; i<type.length; ++i) {
+            const prop = type[i];
+            const o = {name:prop[0], size:prop[1], offset:0};
+            if (prop.length == 3) {
+                const next = [];
+                for(let j=0; j<prop[1]; j++) {
+                    next.push([...prop[2]]);
+                }
+                o.next = next.map((e) => this.multiplyType(e));
+            }
+            res.push(o);
+        }
+        return res;
+    };
+
+    calcOffset = (type, offset) => {
+        for(let i=0; i<type.length; ++i) {
+            const prop = type[i];
+            prop.offset = offset;
+            if (prop.next) {
+                for(let j=0; j<prop.next.length; j++) {
+                    offset = this.calcOffset(prop.next[j], offset);    
+                }
+            } else {
+                offset += prop.size;    
+            }
+        }
+        return offset;    
+    };
+
+    vget = (prop) => {
+        const v = this.data.slice(prop.offset, prop.offset+prop.size);
+        return (prop.size == 1 ? v[0] : v);
+    };
+
+    vset = (prop, v) => {
+        if (!Array.isArray(v)) {
+            if (prop.size != 1) {
+                console.error('Invalid value for prop', v, prop);
+                return;
+            }    
+            this.data[prop.offset] = v;
+        } else {
+            if (prop.size != v.length) {
+                console.error('Invalid value size for prop', v, prop);
+                return;
+            }
+            for(let i=0, off=prop.offset; i<v.length; ++i, ++off) { 
+                this.data[off] = v[i];
+            }
+        }        
+    };
+
+    buildAccessor = (type, dst) => {
+        for(let i=0; i<type.length; ++i) {
+            const prop = type[i];
+            if (prop.next) {
+                if (prop.next.length == 1) {
+                    dst[prop.name] = this.buildAccessor(prop.next[0], {});    
+                } else {
+                    dst[prop.name] = prop.next.map(e => this.buildAccessor(e, {})); 
+                }
+            } else {
+                dst[prop.name] = { ... prop};
+                Object.defineProperty(dst[prop.name], 'value', {
+                    enumerable: true,
+                    configurable: true,
+                    get : () => {
+                        const v = this.vget(prop);
+                        return (converters[prop.name] === undefined ? v : converters[prop.name].unpack(v));
+                    }, 
+                    set : (v) => {
+                        (converters[prop.name] === undefined 
+                            ? this.vset(prop, v) 
+                            : this.vset(prop, converters[prop.name].pack(v)));
+                    }
+                });
+            }
+        }
+        return dst;
+    };
+}
+
+const dump = new Dump(korg_e2_pattern);
+window.ds = dump;
+export default dump;

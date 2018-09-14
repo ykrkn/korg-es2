@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ES2Service } from './service';
+import dump from './struct';
 
 class ToggleButton extends Component {
     constructor(props) {
@@ -91,7 +91,6 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-    // this.service = new ES2Service();
     this.datasetPromise = async () => {
       const response = await fetch('/ds.json');
       return response.json();
@@ -102,12 +101,13 @@ class App extends Component {
   getDataset = async () => {
     const json = await this.datasetPromise();
     const id = Math.round(Math.random()*json.length);
-    window.ds = json[id];
-    this.setState({pattern : json[id]});
+    dump.import(json[id]);
+    this.setState({pattern : dump.struct});
   };
 
   render() {
     const { pattern } = this.state;
+    if (!pattern) return null;
     return (
       <div className="App">
         <header className="App-header"></header>
