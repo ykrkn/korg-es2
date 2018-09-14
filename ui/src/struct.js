@@ -106,29 +106,25 @@ const korg_e2_pattern = [
     ['reserved7',1024],
 ];
 
-const traverse = (struct, offset) => {
-    for(let i=0; i<struct.length; ++i) {
-        let type = struct[i];
-        if (type.length == 2) {
-            type[2] = offset;
-            offset += type[1];
-        } else if (type.length == 3) {
-            let sizeof = type[1];
-            let next_type = type[2];
-            let next_struct = [];
-            for(let j=0; j<sizeof; ++j) {
-                next_struct[j] = [ ... next_type];
+const multiplyType = (type) => {
+    const res = [];
+    for(let i=0; i<type.length; ++i) {
+        const prop = type[i];
+        if (prop.length == 3) {
+            const next = [];
+            for(let j=0; j<prop[1]; j++) {
+                next.push([...prop[2]]);
             }
-            for(let j=0; j<sizeof; ++j) {
-                offset = traverse(next_struct, offset);
-                next_struct[j][3] = offset;
-            }
-            type[3] = next_struct;
+            prop[2] = next.map(multiplyType);
         }
+        res.push([...prop]);
     }
-    return offset;
+    return res;
 };
 
-traverse(korg_e2_pattern, 0);
-console.log(korg_e2_pattern);
-export default korg_e2_pattern;
+
+const struct = multiplyType(korg_e2_pattern);
+
+console.log(struct);
+
+export default struct;
