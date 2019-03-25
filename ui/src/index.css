@@ -23,7 +23,7 @@ body {
 .part-details {
   background: rgb(79, 77, 79);
   min-height: 99px;
-  width: 570px;
+  width: 2424px;
 }
 
 .Pattern {
@@ -31,12 +31,11 @@ body {
 }
 
 .ToggleButton {
-  line-height: 10px;
   outline: 0;
   text-align: center;
   min-width: 24px;
-  max-width: 24px;
-  height: 32px;
+  width: 24px;
+  height: 48px;
   border: 1px solid rgb(79, 77, 79);
   margin: 1px;
   padding:0;
@@ -48,12 +47,10 @@ body {
 }
 
 .PadButton {
-  line-height: 10px;
   outline: 0;
-  text-align: center;
-  min-width: 32px;
-  max-width: 32px;
-  height: 32px;
+  min-width: 48px;
+  width: 48px;
+  height: 48px;
   border: 1px solid rgb(79, 77, 79);
   margin: 1px;
   background: rgba(0, 0, 0, 0.3);

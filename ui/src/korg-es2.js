@@ -130,16 +130,42 @@ const converters = {
     'name' : stringConverter
 };
 
+const ba2string = (chunk, ba) => {
+    let s = "";
+    for (let i = 0; i < chunk.length; i++) {
+        let n = ba[chunk.offset+i];
+        if(n == 0) break;
+        s = s.concat(String.fromCharCode(n));
+    }
+    return s;
+};
+
+const ba2byte = (chunk, ba) => {
+    return ba[chunk.offset];
+};
+
+const ba2short = (chunk, ba) => {
+    const _ba = ba.slice(chunk.offset, chunk.offset+chunk.length);
+    return (((_ba[1] & 0xFF) << 8) | _ba[0] & 0xFF);
+};
+
+const ba2int = (chunk, ba) => {
+    const _ba = ba.slice(chunk.offset, chunk.offset+chunk.length);
+    return ((_ba[3] & 0xFF) << 24) | ((_ba[2] & 0xFF) << 16) | ((_ba[1] & 0xFF) << 8) | _ba[0] & 0xFF;
+};
+
+
 const DUMP_SIZE = 16384;
 
-class Dump { 
+class KorgES2Pattern {
 
-    constructor(struct) {
-        this.data = new Array(DUMP_SIZE).fill(0);
-        this.struct = this.multiplyType(struct);
+    constructor(source) {
+        this.source = source;
+        this.struct = this.multiplyType(korg_e2_pattern);
         const offset = this.calcOffset(this.struct, 0);
         if (offset != DUMP_SIZE) throw new Error('Invalid struct size ' + offset);
-        this.struct = this.buildAccessor(this.struct, { _ : this.struct});
+        this.structIndex = {};
+        this.data = this.unpack(this.struct, {}, '');
     }
 
     import(data) {
@@ -148,21 +174,17 @@ class Dump {
         this.data = data;
     }
 
-    export() {
-        return this.data;
-    }
-
     multiplyType = (type) => {
         const res = [];
         for(let i=0; i<type.length; ++i) {
             const prop = type[i];
             const o = {name:prop[0], size:prop[1], offset:0};
             if (prop.length == 3) {
-                const next = [];
+                const iter = [];
                 for(let j=0; j<prop[1]; j++) {
-                    next.push([...prop[2]]);
+                    iter.push([...prop[2]]);
                 }
-                o.next = next.map((e) => this.multiplyType(e));
+                o.iter = iter.map((e) => this.multiplyType(e));
             }
             res.push(o);
         }
@@ -173,9 +195,9 @@ class Dump {
         for(let i=0; i<type.length; ++i) {
             const prop = type[i];
             prop.offset = offset;
-            if (prop.next) {
-                for(let j=0; j<prop.next.length; j++) {
-                    offset = this.calcOffset(prop.next[j], offset);    
+            if (prop.iter) {
+                for(let j=0; j<prop.iter.length; j++) {
+                    offset = this.calcOffset(prop.iter[j], offset);
                 }
             } else {
                 offset += prop.size;    
@@ -184,59 +206,48 @@ class Dump {
         return offset;    
     };
 
-    vget = (prop) => {
-        const v = this.data.slice(prop.offset, prop.offset+prop.size);
-        return (prop.size == 1 ? v[0] : v);
-    };
+    arr2val = (arr) => {
+        return arr;
+    }
 
-    vset = (prop, v) => {
-        if (!Array.isArray(v)) {
-            if (prop.size != 1) {
-                console.error('Invalid value for prop', v, prop);
-                return;
-            }    
-            this.data[prop.offset] = v;
-        } else {
-            if (prop.size != v.length) {
-                console.error('Invalid value size for prop', v, prop);
-                return;
-            }
-            for(let i=0, off=prop.offset; i<v.length; ++i, ++off) { 
-                this.data[off] = v[i];
-            }
-        }        
-    };
-
-    buildAccessor = (type, dst) => {
-        for(let i=0; i<type.length; ++i) {
-            const prop = type[i];
-            if (prop.next) {
-                if (prop.next.length == 1) {
-                    dst[prop.name] = this.buildAccessor(prop.next[0], {});    
-                } else {
-                    dst[prop.name] = prop.next.map(e => this.buildAccessor(e, {})); 
-                }
+    /**
+     * struct: Array(30)
+     * 0: {name: "header", size: 4, offset: 0}
+     * @param src
+     * @param sink {}
+     */
+    unpack = (src, sink, ipath) => {
+        for (let i = 0; i < src.length; i++) {
+            const e = src[i];
+            if (e.name === 'header') continue;
+            if (e.name === 'footer') continue;
+            if (e.name.indexOf('reserved') == 0) continue;
+            const path = ipath.split(':').concat(e.name).join(':');
+            if (e.iter !== undefined) {
+                sink[e.name] = e.iter.map((it, i) => this.unpack(it, {}, path+':'+i));
             } else {
-                dst[prop.name] = { ... prop};
-                Object.defineProperty(dst[prop.name], 'value', {
-                    enumerable: true,
-                    configurable: true,
-                    get : () => {
-                        const v = this.vget(prop);
-                        return (converters[prop.name] === undefined ? v : converters[prop.name].unpack(v));
-                    }, 
-                    set : (v) => {
-                        (converters[prop.name] === undefined 
-                            ? this.vset(prop, v) 
-                            : this.vset(prop, converters[prop.name].pack(v)));
-                    }
-                });
+                const arr = this.source.slice(e.offset, e.offset+e.size);
+                sink[e.name] = this.arr2val(arr);
+                // const { size, offset } = e;
+                // this.structIndex[path] = {size, offset};
             }
         }
-        return dst;
-    };
+        return sink;
+    }
 }
 
-const dump = new Dump(korg_e2_pattern);
-window.ds = dump;
-export default dump;
+const types = {
+    short : (val) => {
+        return (((val[1] & 0xFF) << 8) | val[0] & 0xFF);
+    },
+    string : (val) => {
+        let r = '';
+        for(let i=0; i<val.length; ++i) {
+            if (val[i] == 0) break;
+            r += String.fromCharCode(val[i]);
+        }
+        return r;
+    }
+};
+
+export { KorgES2Pattern, types };

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import dump from './struct';
+import { KorgES2Pattern, types } from './korg-es2';
 
 class ToggleButton extends Component {
     constructor(props) {
@@ -30,14 +30,38 @@ class ToggleButton extends Component {
 class PadButton extends Component {
     constructor(props) {
         super(props);
-        // this.state = {};
+    }
+
+    note2str = (v) => {
+      let n = ((v - 1) % 12);
+      let o = Math.floor(v/11)-1;
+      //console.log(v, o, n);
+      switch (n) {
+        case 0:  return 'C' +o;
+        case 1:  return 'C#'+o;
+        case 2:  return 'D' +o;
+        case 3:  return 'D#'+o;
+        case 4:  return 'E' +o;
+        case 5:  return 'F' +o;
+        case 6:  return 'F#'+o;
+        case 7:  return 'G' +o;
+        case 8:  return 'G#'+o;
+        case 9:  return 'A' +o;
+        case 10: return 'A#'+o;
+        case 11: return 'B' +o;
+      }
+    };
+
+    renderSlotNotes() {
+      const { data } = this.props;
+      return [data.step_note_slot1, data.step_note_slot2, data.step_note_slot3, data.step_note_slot4]
+        .filter(e => e > 0)
+        .map(e => this.note2str(e)).join(' ');
     }
 
     render() {
-      const { className, payload } = this.props;
-      //console.log(payload);
-      const label = payload.notes.filter(e => e != -1).join(' ');
-      return <button className={className}>{label}</button>;
+      const { className } = this.props;
+      return <button className={className}>{ this.renderSlotNotes() }</button>;
     }
 }
 
@@ -50,11 +74,9 @@ class Part extends Component {
     }
 
     render() {
-        const { payload, patternLength } = this.props;
-        //console.log(payload);
+        const { data } = this.props;
         const { showDetails } = this.state;
-        const visibleSteps = payload.steps.slice(0, 16*patternLength);
-        const { oscillator_type } = payload;
+        const { oscillator_type } = data;
 
         const partToggleOnClick = (e) => {
             this.setState({showDetails : e});    
@@ -62,8 +84,8 @@ class Part extends Component {
         
         return <div className="Part">
             <div className="part-pads-row">
-                <ToggleButton onToggle={partToggleOnClick} label={oscillator_type}/> 
-                {visibleSteps.map(e => <PadButton className="PadButton" payload={e} />)}
+                <ToggleButton onToggle={partToggleOnClick} label={types.short(oscillator_type)}/>
+                {data.steps.map((e, i) => <PadButton key={i} className="PadButton" data={e} />)}
             </div>
             { showDetails ? <div className="part-details">X</div> : null }   
         </div>;
@@ -73,16 +95,11 @@ class Part extends Component {
 class Pattern extends Component {
     constructor(props) {
         super(props);
-        this.state = {};
     }
 
     render() {
-      const { payload } = this.props;
-        //const mseqs = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24].map(e => <MotionSeq />);
-        return (<div className={"Pattern"}>
-          {payload.parts.map(e => <Part payload={e} patternLength={payload.length} />)} 
-          {/*mseqs*/}
-        </div>);
+      const { data } = this.props;
+        return (<div className='Pattern'>{data.parts.map((e,i) => <Part key={i} data={e} />)}</div>);
     }
 }
 
@@ -100,9 +117,12 @@ class App extends Component {
 
   getDataset = async () => {
     const json = await this.datasetPromise();
-    const id = Math.round(Math.random()*json.length);
-    dump.import(json[id]);
-    this.setState({pattern : dump.struct});
+    const id = 243;//Math.round(Math.random()*json.length);
+    console.log("Pattern " + id);
+    const dump = new KorgES2Pattern(json[id]);
+    window.d = dump;
+    // debugger;
+    this.setState({pattern : dump.data});
   };
 
   render() {
@@ -112,10 +132,9 @@ class App extends Component {
       <div className="App">
         <header className="App-header"></header>
         <button onClick={this.getDataset}>get</button>
-        
-        {pattern ? <span> {pattern.name}</span> : null}
-        {pattern ? <span> {pattern.tempo}</span> : null}
-        {pattern ? <Pattern payload={pattern} /> : null}
+        <span> {types.string(pattern.name)}</span>
+        <span> {.1*types.short(pattern.tempo)}</span>
+        <Pattern data={pattern} />
       </div>
     );
   }
