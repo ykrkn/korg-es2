@@ -2,16 +2,32 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
-  font-size: 10px;
+  font-size: 11px;
   background: #292c27;
 }
 
 * {
+  user-select: none;
   color: #f0f0f0;
-  background: #292c27;
 }
 
-.Part {
+button {
+  text-align: center;  
+  border: 1px solid rgb(79, 77, 79);
+  background: #2c3534;
+}
+
+.bars-buttons button {
+  min-width: 34px;
+  min-height: 34px;
+  margin: 1px;
+}
+
+.bars-buttons button.selected {
+  background:#9100ff;
+}
+
+.part {
 
 }
 
@@ -22,48 +38,51 @@ body {
 
 .part-details {
   background: rgb(79, 77, 79);
-  min-height: 99px;
-  width: 2424px;
+  min-height: 64px;
+  width: 1091px;
 }
 
-.Pattern {
-  max-width: 550px;
+.pattern {
+  width: 1092px;
 }
 
-.ToggleButton {
+.toggle-button {
   outline: 0;
-  text-align: center;
-  min-width: 24px;
-  width: 24px;
-  height: 48px;
-  border: 1px solid rgb(79, 77, 79);
+  min-width: 34px;
+  height: 34px;
   margin: 1px;
   padding:0;
-  background: #2c3534;
 }
 
-.ToggleButton.selected {
-  background: rgb(79, 77, 79);
+.toggle-button.selected {
+  background: #9100ff;
 }
 
-.PadButton {
-  outline: 0;
-  min-width: 48px;
-  width: 48px;
-  height: 48px;
-  border: 1px solid rgb(79, 77, 79);
+.part-step {
+  text-align: center;
+  min-width: 58px;
   margin: 1px;
+  padding: 2px;
+  height: 28px;
+  color:#adadad;
+  border-radius: 4px;
+  outline: 0;
+  border: 1px solid rgb(79, 77, 79);
   background: rgba(0, 0, 0, 0.3);
 }
 
-.PadButton.selected {
+.part-step.selected {
   background: rgba(255, 0, 0, 0.3);
 }
 
-.PadButton:hover {
+.pad-button.disabled {
+  border-style: dashed;
+}
+
+.part-step:hover {
   background: rgba(0, 0, 255, 0.3);
 }
 
-.PadButton.selected:hover {
+.part-step.selected:hover {
   background: rgba(255, 0, 255, 0.3);
 }

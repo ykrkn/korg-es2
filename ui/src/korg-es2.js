@@ -237,9 +237,9 @@ class KorgES2Pattern {
 }
 
 const types = {
-    short : (val) => {
-        return (((val[1] & 0xFF) << 8) | val[0] & 0xFF);
-    },
+    bool  : (val) => val[0] != 0,
+    byte  : (val) => val[0],
+    short : (val) => (((val[1] & 0xFF) << 8) | val[0] & 0xFF),
     string : (val) => {
         let r = '';
         for(let i=0; i<val.length; ++i) {
