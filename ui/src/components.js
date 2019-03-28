@@ -1,14 +1,111 @@
 import React, { Component } from 'react';
 import { KorgES2Pattern, types } from './korg-es2';
 
+class EditableButton extends Component {
+
+  constructor(props) {
+    super(props);
+    this.capture = false;
+    this.x = this.y = this.dx = this.dy = 0;
+  }
+
+  down = (e) => {
+    console.log('down', e);
+    this.capture = true;
+    this.x = e.pageX;
+    this.y = e.pageY;
+    this.dx = this.dy = 0;
+    e.target.setPointerCapture(e.pointerId);
+  };
+
+  up = (e) => {
+    console.log('up', e);
+    this.capture = false;
+    e.target.releasePointerCapture(e.pointerId);
+  };
+
+  move = (e) => {
+    if (!this.capture) return;
+    this.dx = Math.floor(this.x - e.pageX);
+    this.dy = Math.floor((this.y - e.pageY)/8);
+    if (this.props.onChangeValue && this.dy !== 0) this.props.onChangeValue(this.dy); 
+  };
+
+  render() {
+    return <button className='note' onPointerDown={this.down} onPointerUp={this.up} onPointerMove={this.move}>{this.props.children}</button>
+  }
+}
+
 class Step extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+          on_off : false, 
+          trigger_on_off : false, 
+          velocity : 0,
+          gate_time : 0,
+          notes: [0,0,0,0],
+        };
     }
 
-    // LOOKATME: https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops
+    // LOOKATME
+    static getDerivedStateFromProps(nextProps, prevState) {
+      const { data } = nextProps;
+
+      const propsData = {
+        on_off : types.bool(data.step_on_off),
+        gate_time : types.byte(data.step_gate_time),
+        velocity : types.byte(data.step_velocity),
+        trigger_on_off : types.bool(data.step_trigger_on_off),
+        notes : [
+          types.byte(data.step_note_slot1),
+          types.byte(data.step_note_slot2),
+          types.byte(data.step_note_slot3),
+          types.byte(data.step_note_slot4),
+        ]
+      };
+
+      const newState = {};
+      
+      if (propsData.on_off != prevState.on_off) newState.on_off = propsData.on_off;
+      if (propsData.gate_time != prevState.gate_time) newState.gate_time = propsData.gate_time;
+      if (propsData.velocity != prevState.velocity) newState.velocity = propsData.velocity;
+      if (propsData.trigger_on_off != prevState.trigger_on_off) newState.trigger_on_off = propsData.trigger_on_off;
+      
+      const notes = [...prevState.notes];
+      let notesChanged = false;
+
+      if (propsData.notes[0] != prevState.notes[0]) {
+        notes[0] = propsData.notes[0];
+        notesChanged = true;
+      }
+      
+      if (propsData.notes[1] != prevState.notes[1]) {
+        notes[1] = propsData.notes[1];
+        notesChanged = true;
+      }
+      
+      if (propsData.notes[2] != prevState.notes[2]) {
+        notes[2] = propsData.notes[2];
+        notesChanged = true;
+      }
+      
+      if (propsData.notes[3] != prevState.notes[3]) {
+        notes[3] = propsData.notes[3];
+        notesChanged = true;
+      }
+      
+      if (notesChanged) {
+        newState.notes = notes;
+      }
+
+      if (Object.keys(newState).length == 0) return null;
+      console.log('getDerivedStateFromProps', nextProps, prevState, newState);
+      return newState;
+    }
 
     note2str = (v) => {
+      if (v === 0) return '---';
       let n = ((v - 1) % 12);
       let o = Math.floor(v/11)-1;
       //console.log(v, o, n);
@@ -28,23 +125,70 @@ class Step extends Component {
       }
     };
 
-    renderSlotNotes(data) {
-      const notes = [data.step_note_slot1, data.step_note_slot2, data.step_note_slot3, data.step_note_slot4]
-        .filter(e => e > 0)
-        .map(e => this.note2str(e));
-        return <span>{[notes[0], notes[1]].join(' ')}<br/>{[notes[2], notes[3]].join(' ')}</span>;
+    createStyleByData() {
+      const { velocity, on_off } = this.state;
+      const style = {};
+      style.color = `rgb(${2*velocity}, 0, 0)`;
+      style.opacity = (on_off ? 1 : .2);
+      if (on_off) {
+        const velocityShadow = (velocity>>2)-26;
+        style.boxShadow = `0 0 32px ${velocityShadow}px rgb(116, 28, 120) inset`;
+      }
+      // console.log(data, style);
+      return style;
     }
 
-    render() {
-      const { data } = this.props;
-      const style = {};
-      if (this.props.showDetails) style.height = 100;
-      const velocity = types.byte(data.step_velocity);
-      const on_off = types.bool(data.step_on_off);
-      style.color = `rgb(${2*velocity}, 0, 0)`;
-      style.opacity = (on_off ? 1 : .3);
-      console.log(data, style);
-      return <div className='part-step' style={style}>{ this.renderSlotNotes(data) }</div>;
+    incrementVelocity = (delta) => {
+      const oldValue = this.state.velocity;
+      let value = oldValue + delta;
+      if (value < 1) value = 1;
+      if (value > 127) value = 127;
+      if (value === oldValue) return;
+      this.setState({velocity : value}); 
+    };
+
+    incrementGateTime = (delta) => {
+      const oldValue = this.state.velocity;
+      let value = oldValue + delta;
+      if (value < 0) value = 0;
+      if (value > 96) value = 127;
+      if (value === oldValue) return;
+      this.setState({gate_time : value}); 
+    };
+
+    incrementNote = (delta, idx) => {
+      const oldValue = this.state.notes[idx];
+      let value = oldValue + delta;
+      if (value < 0) value = 0;
+      if (value > 128) value = 128;
+      if (value === oldValue) return;
+      const { notes } = this.state;
+      notes[idx] = value; 
+      this.setState({notes}); 
+    };
+
+    renderNoteButton = (note, i) => {
+      return <EditableButton key={'note_'+i} onChangeValue={d => this.incrementNote(d, i)}>{this.note2str(note)}</EditableButton>;
+    };
+
+    render() {      
+      const { notes, velocity, gate_time, on_off, trigger_on_off } = this.state;
+    
+      if (this.props.showDetails) {
+        return <div className='part-step-details'>
+          { notes.map(this.renderNoteButton) }
+          <EditableButton className='note' onChangeValue={this.incrementVelocity}>{velocity}</EditableButton>
+          <EditableButton className='note' onChangeValue={this.incrementGateTime}>{gate_time !== 127 ? gate_time : 'TIE'}</EditableButton>
+          <EditableButton className='note'>{String(on_off)}</EditableButton>
+          <EditableButton className='note'>{String(trigger_on_off)}</EditableButton>
+        </div>;
+      } else {
+        const style = this.createStyleByData();
+        const n = notes.filter(e => e > 0).map(e => this.note2str(e));
+        return <div className='part-step' style={style}>
+          <span>{[n[0], n[1]].join(' ')}<br/>{[n[2], n[3]].join(' ')}</span>
+        </div>;
+      }
     }
 }
 

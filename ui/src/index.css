@@ -58,6 +58,24 @@ button {
   background: #9100ff;
 }
 
+.part-step-details {
+  min-width: 58px;
+  margin: 1px;
+  padding: 2px;
+  height: 144px;
+  border: 1px solid rgb(68, 68, 68);
+}
+
+.part-step-details .note {
+  width: 58px;
+  border: none;
+  margin:1px 0;
+}
+
+.part-step-details .note:focus {
+  outline:none;
+}
+
 .part-step {
   text-align: center;
   min-width: 58px;
@@ -67,8 +85,7 @@ button {
   color:#adadad;
   border-radius: 4px;
   outline: 0;
-  border: 1px solid rgb(79, 77, 79);
-  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgb(138, 138, 138);
 }
 
 .part-step.selected {
