@@ -14,7 +14,8 @@ class EditableButton extends Component {
     this.capture = true;
     this.x = e.pageX;
     this.y = e.pageY;
-    this.dx = this.dy = 0;
+    this.dx = e.pageX;
+    this.dy = e.pageY;
     e.target.setPointerCapture(e.pointerId);
   };
 
@@ -26,13 +27,30 @@ class EditableButton extends Component {
 
   move = (e) => {
     if (!this.capture) return;
-    this.dx = Math.floor(this.x - e.pageX);
-    this.dy = Math.floor((this.y - e.pageY)/8);
-    if (this.props.onChangeValue && this.dy !== 0) this.props.onChangeValue(this.dy); 
+    this.dx = this.x - e.pageX;
+    this.dy = this.y - e.pageY;
+    this.x = e.pageX;
+    this.y = e.pageY;
+    if (undefined === this.props.onChangeValue) return; 
+    if (this.dy > 0) this.props.onChangeValue(1);
+    if (this.dy < 0) this.props.onChangeValue(-1);
   };
 
   render() {
-    return <button className='note' onPointerDown={this.down} onPointerUp={this.up} onPointerMove={this.move}>{this.props.children}</button>
+    const { onClick, backgroundRenderer } = this.props;
+    const style = {};
+    if (this.props.backgroundRenderer !== undefined) {
+      const bgcolor = backgroundRenderer();
+      if (bgcolor !== null) style.backgroundColor = bgcolor;    
+    }
+
+    return (<button className='note' 
+      style={style}
+      onClick={onClick}
+      onPointerDown={this.down} 
+      onPointerUp={this.up} 
+      onPointerMove={this.move}>{this.props.children}
+    </button>);
   }
 }
 
@@ -40,6 +58,7 @@ class Step extends Component {
     constructor(props) {
         super(props);
         this.state = {
+          data : null,
           on_off : false, 
           trigger_on_off : false, 
           velocity : 0,
@@ -48,60 +67,26 @@ class Step extends Component {
         };
     }
 
-    // LOOKATME
-    static getDerivedStateFromProps(nextProps, prevState) {
-      const { data } = nextProps;
-
-      const propsData = {
-        on_off : types.bool(data.step_on_off),
-        gate_time : types.byte(data.step_gate_time),
-        velocity : types.byte(data.step_velocity),
-        trigger_on_off : types.bool(data.step_trigger_on_off),
-        notes : [
-          types.byte(data.step_note_slot1),
-          types.byte(data.step_note_slot2),
-          types.byte(data.step_note_slot3),
-          types.byte(data.step_note_slot4),
-        ]
-      };
-
-      const newState = {};
-      
-      if (propsData.on_off != prevState.on_off) newState.on_off = propsData.on_off;
-      if (propsData.gate_time != prevState.gate_time) newState.gate_time = propsData.gate_time;
-      if (propsData.velocity != prevState.velocity) newState.velocity = propsData.velocity;
-      if (propsData.trigger_on_off != prevState.trigger_on_off) newState.trigger_on_off = propsData.trigger_on_off;
-      
-      const notes = [...prevState.notes];
-      let notesChanged = false;
-
-      if (propsData.notes[0] != prevState.notes[0]) {
-        notes[0] = propsData.notes[0];
-        notesChanged = true;
-      }
-      
-      if (propsData.notes[1] != prevState.notes[1]) {
-        notes[1] = propsData.notes[1];
-        notesChanged = true;
-      }
-      
-      if (propsData.notes[2] != prevState.notes[2]) {
-        notes[2] = propsData.notes[2];
-        notesChanged = true;
-      }
-      
-      if (propsData.notes[3] != prevState.notes[3]) {
-        notes[3] = propsData.notes[3];
-        notesChanged = true;
-      }
-      
-      if (notesChanged) {
-        newState.notes = notes;
+    static getDerivedStateFromProps(props, state) {      
+      if (state.data != props.data) {
+        const { data } = props; 
+        console.log('getDerivedStateFromProps');
+        return {
+          data : data,
+          on_off : types.bool(data.step_on_off),
+          gate_time : types.byte(data.step_gate_time),
+          velocity : types.byte(data.step_velocity),
+          trigger_on_off : types.bool(data.step_trigger_on_off),
+          notes : [
+            types.byte(data.step_note_slot1),
+            types.byte(data.step_note_slot2),
+            types.byte(data.step_note_slot3),
+            types.byte(data.step_note_slot4),
+          ]
+        };
       }
 
-      if (Object.keys(newState).length == 0) return null;
-      console.log('getDerivedStateFromProps', nextProps, prevState, newState);
-      return newState;
+      return null;
     }
 
     note2str = (v) => {
@@ -152,6 +137,7 @@ class Step extends Component {
       let value = oldValue + delta;
       if (value < 0) value = 0;
       if (value > 96) value = 127;
+      // FIXME
       if (value === oldValue) return;
       this.setState({gate_time : value}); 
     };
@@ -177,10 +163,12 @@ class Step extends Component {
       if (this.props.showDetails) {
         return <div className='part-step-details'>
           { notes.map(this.renderNoteButton) }
-          <EditableButton className='note' onChangeValue={this.incrementVelocity}>{velocity}</EditableButton>
-          <EditableButton className='note' onChangeValue={this.incrementGateTime}>{gate_time !== 127 ? gate_time : 'TIE'}</EditableButton>
-          <EditableButton className='note'>{String(on_off)}</EditableButton>
-          <EditableButton className='note'>{String(trigger_on_off)}</EditableButton>
+          <EditableButton onChangeValue={this.incrementVelocity}>{velocity}</EditableButton>
+          <EditableButton onChangeValue={this.incrementGateTime}>{gate_time !== 127 ? gate_time : 'TIE'}</EditableButton>
+          <EditableButton onClick={() => this.setState({on_off : !on_off})} 
+            backgroundRenderer={() => on_off ? 'rgb(107, 43, 65)' : null}>{on_off ? 'ON' : 'OFF'}</EditableButton>
+          <EditableButton onClick={() => this.setState({trigger_on_off : !trigger_on_off})} 
+            backgroundRenderer={() => trigger_on_off ? 'rgb(107, 43, 65)' : null}>{trigger_on_off ? 'ON' : 'OFF'}</EditableButton>
         </div>;
       } else {
         const style = this.createStyleByData();
@@ -237,7 +225,9 @@ class Bar extends Component {
   render() {
     const { idx, parts, patternLength, visible } = this.props;
     if (!visible) return null;
-    return (<div className='bar'>{parts.map((e, i) => <Part key={i} data={e} patternLength={patternLength} bar={idx} idx={i} />)}</div>);
+    return (<div className='bar'>
+      {parts.map((e, i) => <Part key={i} data={e} patternLength={patternLength} bar={idx} idx={i} />)}
+    </div>);
   }
 }
 
