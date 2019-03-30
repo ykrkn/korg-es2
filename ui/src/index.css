@@ -8,7 +8,7 @@ body {
 
 * {
   user-select: none;
-  color: #f0f0f0;
+  color: #9a9a9a;
   box-sizing: border-box;
 }
 
@@ -16,6 +16,10 @@ button {
   text-align: center;  
   border: 1px solid rgb(79, 77, 79);
   background: #2c3534;
+}
+
+button:focus {
+  outline:none;
 }
 
 .bars-buttons button {
@@ -32,21 +36,8 @@ button {
   display: flex;
 }
 
-.steps-row {
-  direction: ltr !important;
-  display: flex;
-  flex-direction: row;
-  width: 1091px;
-}
+.part-toggle {
 
-.part-details {
-  background: rgb(79, 77, 79);
-  min-height: 64px;
-  width: 1091px;
-}
-
-.pattern {
-  width: 1092px;
 }
 
 .toggle-button {
@@ -61,16 +52,70 @@ button {
   background: #9100ff;
 }
 
+.part-details {
+  background: rgb(79, 77, 79);
+  height: 143px;
+  width: 1124px;
+  position: absolute;
+}
+
+.part-details.hidden {
+  transform: translate(-1088px, 0);
+}
+
+.part-details.hidden button.close {
+  display: none;
+}
+
+.part-details.visible {
+  transform: translate(0, 0);
+}
+
+.part-details.visible button.open {
+  display: none;
+}
+
+.part-details button.open,
+.part-details button.close
+{
+  border: none;
+  position: inherit;
+  top:0;
+  width: 36px;
+  background: #2abb1c;
+  color: black;
+}
+
+.part-details button.open { 
+  right: 0;
+}
+
+.part-details button.close { 
+  left: 0;
+}
+
+.steps-row {
+  direction: ltr !important;
+  display: flex;
+  flex-direction: row;
+  width: 1091px;
+}
+
+
+
+.pattern {
+  width: 1092px;
+}
+
 .part-step {
   display: flex;
   flex-direction: column;
   width:68px;
 }
 
-.part-step-pad {
-  text-align: center;
+.part-step .pad {
   height: 34px;
-  padding: 4px;
+  padding: 0 8px;
   margin: 1px;
   color:#adadad;
   border-radius: 4px;
@@ -81,10 +126,6 @@ button {
 .part-step .note {
   border: none;
   margin:1px;
-}
-
-.part-step .note:focus {
-  outline:none;
 }
 
 .part-step-pad.selected {

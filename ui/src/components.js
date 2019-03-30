@@ -113,7 +113,7 @@ class Step extends Component {
     createStyleByData() {
       const { velocity, on_off } = this.state;
       const style = {};
-      style.color = `rgb(${2*velocity}, 0, 0)`;
+      // style.color = `rgb(${2*velocity}, 0, 0)`;
       style.opacity = (on_off ? 1 : .2);
       if (on_off) {
         const velocityShadow = (velocity>>2)-26;
@@ -164,9 +164,10 @@ class Step extends Component {
       const style = this.createStyleByData();
       const n = notes.filter(e => e > 0).map(e => this.note2str(e));
       return <div className='part-step'>
-        <div className='part-step-pad' style={style}>
-          <span>{[n[0], n[1]].join(' ')}<br/>{[n[2], n[3]].join(' ')}</span>
-        </div>
+        <button className='pad' style={style} onClick={() => this.setState({on_off : !on_off})}>
+          {[n[0], n[1]].join(' ') + '\n'}
+          {[n[2], n[3]].join(' ')}
+        </button>
 
         { selected ? notes.map(this.renderNoteButton) : null }
         { selected ? <EditableButton onChangeValue={this.incrementVelocity}>{velocity}</EditableButton> : null }
@@ -187,22 +188,32 @@ class Part extends Component {
         };
     }
 
-    renderPartDetails() {
-      const { data } = this.props;
-      const { oscillator_type } = data;
-      return <div className="part-details">OSC: {types.short(oscillator_type)}</div>;
-    }
-
     render() {
         const { data, firstStep, selected } = this.props;
         const steps = data.steps.slice(firstStep, firstStep+16);        
         return <div className="part">
             <div className="steps-row">
                 {steps.map((e, i) => <Step key={i} idx={firstStep+i} data={e} selected={selected} />)}
-            </div>
-            { selected ? this.renderPartDetails() : null }   
+            </div>  
         </div>;
     }
+}
+
+class PartDetails extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      visible : false
+    }
+  }
+
+  render() {
+    const { visible } = this.state;
+    return <div className={'part-details ' + (visible ? 'visible' : 'hidden')}>
+      <button class='open' onClick={() => this.setState({visible : true})}>&rarr;</button>
+      <button class='close' onClick={() => this.setState({visible : false})}>&larr;</button>
+    </div>;
+  }
 }
 
 class Pattern extends Component {
@@ -236,6 +247,7 @@ class Pattern extends Component {
         <div class='part-toggle'>
           <button onClick={selectPart}
             className={'toggle-button' + (selectedPart === idx ? ' selected' : '')}>{(1+idx)}</button>
+            { selectedPart === idx ? <PartDetails data={data} /> : null } 
         </div>
         <Part data={data} firstStep={16*selectedBar} selected={selectedPart === idx} />
       </div>
