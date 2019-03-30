@@ -133,11 +133,11 @@ class Step extends Component {
     };
 
     incrementGateTime = (delta) => {
-      const oldValue = this.state.velocity;
+      const oldValue = this.state.gate_time;
       let value = oldValue + delta;
       if (value < 0) value = 0;
-      if (value > 96) value = 127;
-      // FIXME
+      else if (value > 96 && delta == 1) value = 127;
+      else if (value > 96 && delta == -1) value = 96;
       if (value === oldValue) return;
       this.setState({gate_time : value}); 
     };
