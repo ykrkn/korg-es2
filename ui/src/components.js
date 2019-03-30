@@ -246,11 +246,49 @@ class PartDetails extends Component {
   }
 }
 
+class EnumButtons extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {}
+  }
+
+  // LOOKATME:
+  static getDerivedStateFromProps(props, state) {  
+    const newState = {};
+    if (props.values != state.values) newState.values = props.values;
+    if (props.valueIndex != state.valueIndex) newState.valueIndex = props.valueIndex;
+    if (Object.keys(newState).length != 0) return newState;
+    return null;
+  }
+  
+  onClick(idx) {
+    this.setState({valueIndex : idx});
+    if (this.props.onChangeValue) {
+      this.props.onChangeValue(idx);
+    }  
+  }
+
+  render() {
+    const { values } = this.props;
+    const { valueIndex } = this.state;
+    return <div className='enum-buttons'>
+      {values.map((e, i) => <button key={i} onClick={() => this.onClick(i)} className={valueIndex === i ? 'selected' : null}>{e}</button>)}
+    </div>
+  }
+}
+
 class Pattern extends Component {
+
+    static DetailsView = 1;
+    static PatternView = 2;
+    static MotionsView = 3;
+
     constructor(props) {
         super(props);
         this.state = {
           data : null,
+          viewState : Pattern.DetailsView,
           selectedBar : 0,
           selectedPart : -1,
           patternLength : 1,
@@ -297,14 +335,57 @@ class Pattern extends Component {
       </div>
     }
 
+    renderPatternDetails(data) {
+// debugger;
+      return <div className='pattern-details'>
+          <span> name: {types.string(data.name)}</span><br />
+          <span> tempo: {.1*types.short(data.tempo)}</span><br />
+          <span> swing: {types.byte(data.swing)}</span><br />
+          <span> length: <EnumButtons values={['1','2','3','4']} valueIndex={types.byte(data.length)} /></span><br />
+          <span> beat: {<EnumButtons values={['16','32','8T','16T']} valueIndex={types.byte(data.beat)} />}</span><br />
+          <span> key: {<EnumButtons values={['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']} valueIndex={types.byte(data.key)} />}</span><br />
+          <span> scale: {types.byte(data.scale)}</span><br />
+          <span> chordset: {types.byte(data.chordset)}</span><br />
+          <span> level: {types.byte(data.level)}</span><br />
+          {/* <span> touch_scale: {types.byte(data.touch_scale)}</span><br /> */}
+          <span> alt_1314: {String(types.bool(data.alt_1314))}</span><br />
+          <span> alt_1516: {String(types.bool(data.alt_1516))}</span><br />
+    {/* ['name',18], // null terminated
+    ['tempo',2], // 200~3000 = 20.0 ~ 300.0 UInt16LE
+    ['swing',1], // -48 ~ 48
+    ['length',1], // 0~3 = 1~4bar(s)
+    ['beat',1], // 0, 1, 2, 3 = 16,32,8 Tri, 16 Tri
+    ['key',1], // 0~11 = C~B
+    ['scale',1], // 0~35
+    ['chordset',1], // 0~4
+    ['level',1], // 127 ~ 0 = 0 ~ 127
+    ['touch_scale',1,korg_e2_touch_scale],
+    ['master_fx',1,korg_e2_master_fx],
+    ['alt_1314',1], // 0~1=OFF,ON
+    ['alt_1516',1], // 0~1=OFF,ON */}
+      </div>
+    }
+
     render() {
+      const { viewState } = this.state;
       const { data } = this.props;
       const { parts } = data;
       const arr = [0, 1, 2, 3];
 
       return (<div className='pattern'>
-        <div className='bars-buttons'>{arr.map(idx => this.renderBarButton(idx))}</div>
-          {parts.map((e, i) => this.renderPart(e, i))}
+        <div className='bars-buttons'>
+          <button onClick={() => this.setState({viewState : Pattern.DetailsView})}
+            className={(viewState === Pattern.DetailsView ? 'selected' : null)}>Pattern Details</button>
+          <button onClick={() => this.setState({viewState : Pattern.PatternView})}
+            className={(viewState === Pattern.PatternView ? 'selected' : null)}>Parts</button>
+          <button onClick={() => this.setState({viewState : Pattern.MotionsView})}
+            className={(viewState === Pattern.MotionsView ? 'selected' : null)}>Motions</button>
+          {viewState === Pattern.PatternView || viewState === Pattern.MotionsView 
+            ? arr.map(idx => this.renderBarButton(idx)) : null}
+        </div>
+          {viewState === Pattern.DetailsView ? this.renderPatternDetails(data) : null}
+          {viewState === Pattern.PatternView ? parts.map((e, i) => this.renderPart(e, i)) : null}
+          {viewState === Pattern.MotionsView ? 'Motions will be here' : null}
         </div>);
     }
 }
@@ -341,10 +422,7 @@ class App extends Component {
     return (
       <div>
         <header>
-          <button onClick={this.getDataset}>get</button><br />
-          <span> Name: {types.string(pattern.name)}</span><br />
-          <span> Tempo: {.1*types.short(pattern.tempo)}</span><br />
-          <span> Length: {(1+types.byte(pattern.length))}</span><br />
+          <button onClick={this.getDataset}>get</button>
         </header>
         <Pattern data={pattern} />
       </div>

@@ -23,12 +23,12 @@ button:focus {
 }
 
 .bars-buttons {
-  padding-left: 36px;
+  
 }
 
 .bars-buttons button {
-  width: 34px;
-  height: 34px;
+  min-width: 34px;
+  height: 27px;
   margin: 1px;
 }
 
@@ -62,10 +62,11 @@ button:focus {
   width: 1124px;
   position: absolute;
   padding: 4px 40px;
+  transition: transform .5s;
 }
 
 .part-details.hidden {
-  transform: translate(-1088px, 0);
+  transform: translate(-1089px, 0);
 }
 
 .part-details.hidden button.close {
@@ -147,4 +148,12 @@ button:focus {
 
 .part-step-pad.selected:hover {
   background: rgba(255, 0, 255, 0.3);
+}
+
+.enum-buttons {
+  display: inline-block;
+}
+
+.enum-buttons button.selected {
+  background:#52338e;
 }
