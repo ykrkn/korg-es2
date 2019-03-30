@@ -9,6 +9,7 @@ body {
 * {
   user-select: none;
   color: #f0f0f0;
+  box-sizing: border-box;
 }
 
 button {
@@ -28,12 +29,14 @@ button {
 }
 
 .part {
-
+  display: flex;
 }
 
-.part-pads-row {
+.steps-row {
+  direction: ltr !important;
   display: flex;
   flex-direction: row;
+  width: 1091px;
 }
 
 .part-details {
@@ -58,48 +61,44 @@ button {
   background: #9100ff;
 }
 
-.part-step-details {
-  min-width: 58px;
-  margin: 1px;
-  padding: 2px;
-  height: 144px;
-  border: 1px solid rgb(68, 68, 68);
-}
-
-.part-step-details .note {
-  width: 58px;
-  border: none;
-  margin:1px 0;
-}
-
-.part-step-details .note:focus {
-  outline:none;
-}
-
 .part-step {
+  display: flex;
+  flex-direction: column;
+  width:68px;
+}
+
+.part-step-pad {
   text-align: center;
-  min-width: 58px;
+  height: 34px;
+  padding: 4px;
   margin: 1px;
-  padding: 2px;
-  height: 28px;
   color:#adadad;
   border-radius: 4px;
   outline: 0;
   border: 1px solid rgb(138, 138, 138);
 }
 
-.part-step.selected {
+.part-step .note {
+  border: none;
+  margin:1px;
+}
+
+.part-step .note:focus {
+  outline:none;
+}
+
+.part-step-pad.selected {
   background: rgba(255, 0, 0, 0.3);
 }
 
-.pad-button.disabled {
+.part-step-pad.disabled {
   border-style: dashed;
 }
 
-.part-step:hover {
+.part-step-pad:hover {
   background: rgba(0, 0, 255, 0.3);
 }
 
-.part-step.selected:hover {
+.part-step-pad.selected:hover {
   background: rgba(255, 0, 255, 0.3);
 }

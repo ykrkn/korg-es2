@@ -159,24 +159,23 @@ class Step extends Component {
 
     render() {      
       const { notes, velocity, gate_time, on_off, trigger_on_off } = this.state;
-    
-      if (this.props.showDetails) {
-        return <div className='part-step-details'>
-          { notes.map(this.renderNoteButton) }
-          <EditableButton onChangeValue={this.incrementVelocity}>{velocity}</EditableButton>
-          <EditableButton onChangeValue={this.incrementGateTime}>{gate_time !== 127 ? gate_time : 'TIE'}</EditableButton>
-          <EditableButton onClick={() => this.setState({on_off : !on_off})} 
-            backgroundRenderer={() => on_off ? 'rgb(107, 43, 65)' : null}>{on_off ? 'ON' : 'OFF'}</EditableButton>
-          <EditableButton onClick={() => this.setState({trigger_on_off : !trigger_on_off})} 
-            backgroundRenderer={() => trigger_on_off ? 'rgb(107, 43, 65)' : null}>{trigger_on_off ? 'ON' : 'OFF'}</EditableButton>
-        </div>;
-      } else {
-        const style = this.createStyleByData();
-        const n = notes.filter(e => e > 0).map(e => this.note2str(e));
-        return <div className='part-step' style={style}>
+      const { selected } = this.props;
+
+      const style = this.createStyleByData();
+      const n = notes.filter(e => e > 0).map(e => this.note2str(e));
+      return <div className='part-step'>
+        <div className='part-step-pad' style={style}>
           <span>{[n[0], n[1]].join(' ')}<br/>{[n[2], n[3]].join(' ')}</span>
-        </div>;
-      }
+        </div>
+
+        { selected ? notes.map(this.renderNoteButton) : null }
+        { selected ? <EditableButton onChangeValue={this.incrementVelocity}>{velocity}</EditableButton> : null }
+        { selected ? <EditableButton onChangeValue={this.incrementGateTime}>{gate_time !== 127 ? gate_time : 'TIE'}</EditableButton> : null }
+        { selected ? <EditableButton onClick={() => this.setState({on_off : !on_off})} 
+          backgroundRenderer={() => on_off ? 'rgb(107, 43, 65)' : null}>{on_off ? 'ON' : 'OFF'}</EditableButton> : null }
+        { selected ? <EditableButton onClick={() => this.setState({trigger_on_off : !trigger_on_off})} 
+          backgroundRenderer={() => trigger_on_off ? 'rgb(107, 43, 65)' : null}>{trigger_on_off ? 'ON' : 'OFF'}</EditableButton> : null }
+      </div>;
     }
 }
 
@@ -188,14 +187,6 @@ class Part extends Component {
         };
     }
 
-    renderToggleButton() {
-      const { idx } = this.props;
-      const { showDetails } = this.state;
-      let cn = 'toggle-button';
-      if (showDetails) cn += ' selected';
-      return <button className={cn} onClick={() => this.setState({showDetails : !showDetails})}>{(1+idx)}</button>;
-    }
-
     renderPartDetails() {
       const { data } = this.props;
       const { oscillator_type } = data;
@@ -203,32 +194,15 @@ class Part extends Component {
     }
 
     render() {
-        const { data, bar } = this.props;
-        const { showDetails } = this.state;
-        const firstStep = 16*bar;
+        const { data, firstStep, selected } = this.props;
         const steps = data.steps.slice(firstStep, firstStep+16);        
         return <div className="part">
-            <div className="part-pads-row">
-                {this.renderToggleButton()}
-                {steps.map((e, i) => <Step key={i} idx={firstStep+i} data={e} showDetails={showDetails} />)}
+            <div className="steps-row">
+                {steps.map((e, i) => <Step key={i} idx={firstStep+i} data={e} selected={selected} />)}
             </div>
-            { showDetails ? this.renderPartDetails() : null }   
+            { selected ? this.renderPartDetails() : null }   
         </div>;
     }
-}
-
-class Bar extends Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    const { idx, parts, patternLength, visible } = this.props;
-    if (!visible) return null;
-    return (<div className='bar'>
-      {parts.map((e, i) => <Part key={i} data={e} patternLength={patternLength} bar={idx} idx={i} />)}
-    </div>);
-  }
 }
 
 class Pattern extends Component {
@@ -236,27 +210,46 @@ class Pattern extends Component {
         super(props);
         this.state = {
           selectedBar : 0,
+          selectedPart : -1,
           patternLength : 1,
         }
     }
 
     renderBarButton(idx) {
       const { selectedBar } = this.state;
-      return <button key={idx} onClick={() => this.setState({selectedBar : idx})} className={selectedBar == idx ? 'selected' : null}>{idx+1}</button>;
+      return <button key={idx} 
+        onClick={() => this.setState({selectedBar : idx})} 
+        className={selectedBar == idx ? 'selected' : null}>{idx+1}</button>;
     }
 
-    renderBar(idx) {
-      const { data } = this.props;
-      const { patternLength, selectedBar } = this.state;
-      return <Bar key={idx} idx={idx} parts={data.parts} patternLength={patternLength} visible={selectedBar == idx} />;
+    renderPart(data, idx) {
+      const { selectedBar, selectedPart } = this.state;
+
+      const selectPart = () => {
+        if (selectedPart === idx) 
+          this.setState({selectedPart : -1});
+        else   
+          this.setState({selectedPart : idx});
+      };
+
+      return <div class='part'>
+        <div class='part-toggle'>
+          <button onClick={selectPart}
+            className={'toggle-button' + (selectedPart === idx ? ' selected' : '')}>{(1+idx)}</button>
+        </div>
+        <Part data={data} firstStep={16*selectedBar} selected={selectedPart === idx} />
+      </div>
     }
 
     render() {
-      const arr = [0,1,2,3];
+      const { data } = this.props;
+      const { parts } = data;
+      const arr = [0, 1, 2, 3];
+
       return (<div className='pattern'>
         <div className='bars-buttons'>{arr.map(idx => this.renderBarButton(idx))}</div>
-        <div className='bars'>{arr.map(idx => this.renderBar(idx))}</div>
-      </div>);
+          {parts.map((e, i) => this.renderPart(e, i))}
+        </div>);
     }
 }
 
