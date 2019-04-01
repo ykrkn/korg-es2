@@ -54,6 +54,119 @@ class EditableButton extends Component {
   }
 }
 
+class TextInput extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {};  
+  }
+
+  static getDerivedStateFromProps(props, state) { 
+    if (props.value !== state._value) return { 
+      _value : props.value, 
+      value : props.value 
+    };
+    return null;
+  }
+
+  onChange(value) {
+    this.setState({value});
+    if (this.props.onChange) {
+      this.props.onChange(value);
+    }
+  }
+
+  render() {
+    return <input maxLength={18} value={this.state.value} onChange={(e) => this.onChange(e.target.value)} />
+  }
+}
+
+class NumberInput extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {};  
+  }
+
+  static getDerivedStateFromProps(props, state) { 
+    if (props.value !== state._value) return { 
+      _value : props.value, 
+      value : props.value 
+    };
+    return null;
+  }
+
+  onChange(value) {
+    this.setState({value});
+    if (this.props.onChange) {
+      this.props.onChange(value);
+    }
+  }
+
+  render() {
+    return <input value={this.state.value} onChange={(e) => this.onChange(e.target.value)} />
+  }
+}
+
+class BooleanInput extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {};  
+  }
+
+  static getDerivedStateFromProps(props, state) { 
+    if (props.value !== state._value) return { 
+      _value : props.value, 
+      value : props.value 
+    };
+    return null;
+  }
+
+  onChange() {
+    const v = !this.state.value;
+    this.setState({value : v});
+    if (this.props.onChange) {
+      this.props.onChange(v);
+    }
+  }
+
+  render() {
+    const { value } = this.state;
+    return <input type='checkbox' checked={value} onChange={() => this.onChange()} />
+  }
+}
+
+class Selector extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {}
+  }
+  
+  static getDerivedStateFromProps(props, state) {  
+    const newState = {};
+    if (props.values != state.values) newState.values = props.values;
+    if (props.value != state._value) newState._value = newState.value = props.value;
+    if (Object.keys(newState).length != 0) return newState;
+    return null;
+  }
+  
+  onChange(idx) {
+    this.setState({value : idx});
+    if (this.props.onChange) {
+      this.props.onChange(idx);
+    }  
+  }
+
+  render() {
+    const { values } = this.props;
+    const { value } = this.state;
+    return <select value={value} onChange={(e) => this.onChange(e.target.value)}>
+      { Object.keys(values)
+        .map(k => parseInt(k))
+        .map(k => <option key={k} value={k}>{values[k]}</option>) 
+      }</select>
+  }
+}
+
 class Step extends Component {
     constructor(props) {
         super(props);
@@ -96,16 +209,16 @@ class Step extends Component {
       //console.log(v, o, n);
       switch (n) {
         case 0:  return 'C' +o;
-        case 1:  return 'C#'+o;
+        case 1:  return 'C♯'+o;
         case 2:  return 'D' +o;
-        case 3:  return 'D#'+o;
+        case 3:  return 'D♯'+o;
         case 4:  return 'E' +o;
         case 5:  return 'F' +o;
-        case 6:  return 'F#'+o;
+        case 6:  return 'F♯'+o;
         case 7:  return 'G' +o;
-        case 8:  return 'G#'+o;
+        case 8:  return 'G♯'+o;
         case 9:  return 'A' +o;
-        case 10: return 'A#'+o;
+        case 10: return 'A♯'+o;
         case 11: return 'B' +o;
       }
     };
@@ -210,8 +323,8 @@ class PartDetails extends Component {
   render() {
     const { visible } = this.state;
     return <div className={'part-details ' + (visible ? 'visible' : 'hidden')}>
-      <button class='open' onClick={() => this.setState({visible : true})}>&rarr;</button>
-      <button class='close' onClick={() => this.setState({visible : false})}>&larr;</button>
+      <button className='open' onClick={() => this.setState({visible : true})}>&rarr;</button>
+      <button className='close' onClick={() => this.setState({visible : false})}>&larr;</button>
 
     ['last_step',1], // 0,1~15=16,1~15
     ['mute',1], // 0,1=OFF,ON
@@ -246,37 +359,48 @@ class PartDetails extends Component {
   }
 }
 
-class EnumButtons extends Component {
+const PatternLengthMap = {0:'1', 1:'2', 2:'3', 3:'4'};
+const PatternBeatMap = {0:'16', 1:'32', 2:'8T', 3:'16T'};
+const PatternKeyMap = {0:'C', 1:'C♯', 2:'D', 3:'D♯', 4:'E', 5:'F', 6:'F♯', 7:'G', 8:'G♯', 9:'A', 10:'A♯', 11:'B'};
+const PatternChordsetMap = {0:'1', 1:'2', 2:'3', 3:'4', 4:'5'};
 
-  constructor(props) {
-    super(props);
-    this.state = {}
-  }
-
-  // LOOKATME:
-  static getDerivedStateFromProps(props, state) {  
-    const newState = {};
-    if (props.values != state.values) newState.values = props.values;
-    if (props.valueIndex != state.valueIndex) newState.valueIndex = props.valueIndex;
-    if (Object.keys(newState).length != 0) return newState;
-    return null;
-  }
-  
-  onClick(idx) {
-    this.setState({valueIndex : idx});
-    if (this.props.onChangeValue) {
-      this.props.onChangeValue(idx);
-    }  
-  }
-
-  render() {
-    const { values } = this.props;
-    const { valueIndex } = this.state;
-    return <div className='enum-buttons'>
-      {values.map((e, i) => <button key={i} onClick={() => this.onClick(i)} className={valueIndex === i ? 'selected' : null}>{e}</button>)}
-    </div>
-  }
-}
+const PatternScaleMap = [
+  [1, 'Chromatic', 'C, D♭, D, E♭, E, F, G♭, G, A♭, A, B♭, B'],
+  [2, 'Ionian', 'C, D, E, F, G, A, B'],
+  [3, 'Dorian', 'C, D, E♭, F, G, A, B♭'],
+  [4, 'Phrygian', 'C, D♭, E♭, F, G, A♭, B♭'],
+  [5, 'Lydian', 'C, D, E, F♯, G, A, B'],
+  [6, 'Mixolydian', 'C, D, E, F, G, A, B♭'],
+  [7, 'Aeolian', 'C, D, E♭, F, G, A♭, B♭'],
+  [8, 'Locrian', 'C, D♭, E♭, F, G♭, A♭, B♭'],
+  [9, 'Harmonic minor', 'C, D, E♭, F, G, A♭, B'],
+  [10, 'Melodic minor', 'C, D, E♭, F, G, A, B'],
+  [11, 'Major Blues', 'C, D, E♭, E, G, A'],
+  [12, 'minor Blues', 'C, E♭, F, G♭, G, B♭'],
+  [13, 'Diminished', 'C, D, E♭, F, F♯, G♯, A, B'],
+  [14, 'Combination Dim', 'C, D♭, E♭, E, F♯, G, A, B♭'],
+  [15, 'Major Penta', 'C, D, E, G, A'],
+  [16, 'minor Penta', 'C, E♭, F, G, B♭'],
+  [17, 'Raga 1 (Bhairav)', 'C, D♭, E, F, G, A♭, B'],
+  [18, 'Raga 2 (Gamanasrama)', 'C, D♭, E, F♯, G, A, B'],
+  [19, 'Raga 3 (Todi)', 'C, D♭, E♭, F♯, G, A♭, B'],
+  [20, 'Arabic', 'C, D, E, F, G♭, A♭, B♭'],
+  [21, 'Spanish', 'C, D♭, E♭, E, F, G, A♭, B♭'],
+  [22, 'Gypsy', 'C, D, E♭, F♯, G, A♭, B'],
+  [23, 'Egyptian', 'C, D, F, G, B♭'],
+  [24, 'Hawaiian', 'C, D, E♭, G, A'],
+  [25, 'Pelog', 'C, D♭, E♭, G, A♭'],
+  [26, 'Japanese', 'C, D♭, F, G, A♭'],
+  [27, 'Ryuku', 'C, E, F, G, B'],
+  [28, 'Chinese', 'C, E, F♯, G, B'],
+  [29, 'Bass Line', 'C, G, B♭'],
+  [30, 'Whole Tone', 'C, D, E, G♭, A♭, B♭'],
+  [31, 'Minor 3rd', 'C, E♭, G♭, A'],
+  [32, 'Major 3rd', 'C, E, A♭'],
+  [33, '4th Interval', 'C, F, B♭'],
+  [34, '5th Interval', 'C, G'],
+  [35, 'Octave', 'C'],
+].map(e => [e[0]-1, e[1], e[2]]);
 
 class Pattern extends Component {
 
@@ -335,21 +459,29 @@ class Pattern extends Component {
       </div>
     }
 
+    onChangePatternProperty(pname, value) {
+      console.log(pname, value);
+    }
+
     renderPatternDetails(data) {
-// debugger;
+      const lengthMap = PatternLengthMap;
+      const beatMap = PatternBeatMap;
+      const keyMap = PatternKeyMap;
+      const scaleMap = PatternScaleMap.reduce((acc, x) => { acc[x[0]] = x[1]; return acc; }, {});
+      const chordsetMap = PatternChordsetMap;
+
       return <div className='pattern-details'>
-          <span> name: {types.string(data.name)}</span><br />
-          <span> tempo: {.1*types.short(data.tempo)}</span><br />
-          <span> swing: {types.byte(data.swing)}</span><br />
-          <span> length: <EnumButtons values={['1','2','3','4']} valueIndex={types.byte(data.length)} /></span><br />
-          <span> beat: {<EnumButtons values={['16','32','8T','16T']} valueIndex={types.byte(data.beat)} />}</span><br />
-          <span> key: {<EnumButtons values={['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']} valueIndex={types.byte(data.key)} />}</span><br />
-          <span> scale: {types.byte(data.scale)}</span><br />
-          <span> chordset: {types.byte(data.chordset)}</span><br />
-          <span> level: {types.byte(data.level)}</span><br />
-          {/* <span> touch_scale: {types.byte(data.touch_scale)}</span><br /> */}
-          <span> alt_1314: {String(types.bool(data.alt_1314))}</span><br />
-          <span> alt_1516: {String(types.bool(data.alt_1516))}</span><br />
+            <div className='row'> Name <TextInput value={types.string(data.name)} onChange={(v) => this.onChangePatternProperty('name', v)}/></div>
+            <div className='row'> Tempo <NumberInput value={.1*types.short(data.tempo)} onChange={(v) => this.onChangePatternProperty('tempo', v)}/></div>
+            <div className='row'> Length <Selector values={lengthMap} value={types.byte(data.length)} onChange={(v) => this.onChangePatternProperty('length', v)} /></div>
+            <div className='row'> Level <NumberInput value={types.byte(data.level)} onChange={(v) => this.onChangePatternProperty('level', v)}/></div>
+            <div className='row'> Swing <NumberInput value={types.byte(data.swing)} onChange={(v) => this.onChangePatternProperty('swing', v)}/></div>
+            <div className='row'> Beat <Selector values={beatMap} value={types.byte(data.beat)} onChange={(v) => this.onChangePatternProperty('beat', v)} /></div>
+            <div className='row'> Key <Selector values={keyMap} value={types.byte(data.key)} onChange={(v) => this.onChangePatternProperty('key', v)} /></div>
+            <div className='row'> Scale <Selector values={scaleMap} value={types.byte(data.scale)} onChange={(v) => this.onChangePatternProperty('scale', v)} /></div>
+            <div className='row'> Chord set <Selector values={chordsetMap} value={types.byte(data.chordset)} onChange={(v) => this.onChangePatternProperty('chordset', v)} /></div>
+            <div className='row'> Alt 1314 <BooleanInput value={types.bool(data.alt_1314)} onChange={(v) => this.onChangePatternProperty('alt_1314', v)} /></div>
+            <div className='row'> Alt 1516 <BooleanInput value={types.bool(data.alt_1516)} onChange={(v) => this.onChangePatternProperty('alt_1516', v)} /></div>
     {/* ['name',18], // null terminated
     ['tempo',2], // 200~3000 = 20.0 ~ 300.0 UInt16LE
     ['swing',1], // -48 ~ 48

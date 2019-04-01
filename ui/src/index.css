@@ -2,7 +2,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   background: #292c27;
 }
 
@@ -12,14 +12,24 @@ body {
   box-sizing: border-box;
 }
 
-button {
-  text-align: center;  
+button, input { 
   border: 1px solid rgb(79, 77, 79);
   background: #2c3534;
 }
 
-button:focus {
+button:focus, select:focus, input:focus {
   outline:none;
+}
+
+select {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0px;
+  border: 1px solid rgb(79, 77, 79);
+  background: #2c3534;
+  padding: 1px 4px;
+  min-width: 24px;
 }
 
 .bars-buttons {
@@ -54,6 +64,17 @@ button:focus {
 
 .toggle-button.selected {
   background: #9100ff;
+}
+
+.pattern {
+  width: 1092px;
+}
+
+.pattern-details {
+}
+
+.pattern-details .row {
+  padding: 4px;
 }
 
 .part-details {
@@ -107,12 +128,6 @@ button:focus {
   width: 1091px;
 }
 
-
-
-.pattern {
-  width: 1092px;
-}
-
 .part-step {
   display: flex;
   flex-direction: column;
@@ -148,12 +163,4 @@ button:focus {
 
 .part-step-pad.selected:hover {
   background: rgba(255, 0, 255, 0.3);
-}
-
-.enum-buttons {
-  display: inline-block;
-}
-
-.enum-buttons button.selected {
-  background:#52338e;
 }
