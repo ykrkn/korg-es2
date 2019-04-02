@@ -66,6 +66,16 @@ select {
   background: #9100ff;
 }
 
+button.toggle {
+  outline: 0;
+  margin: 1px;
+  padding:0;
+}
+
+button.toggle.selected {
+  background: #9100ff;
+}
+
 .pattern {
   width: 1092px;
 }
