@@ -84,9 +84,12 @@ class NumberInput extends Component {
     this.dy = this.y - e.pageY;
     this.x = e.pageX;
     this.y = e.pageY;
+    let { value } = this.state;
+    if (this.dy > 0) value++;
+    if (this.dy < 0) value--;
+    this.setState({value});
     if (undefined === this.props.onChange) return; 
-    if (this.dy > 0) this.props.onChange(1);
-    if (this.dy < 0) this.props.onChange(-1);
+    this.props.onChange(value);
   };
 
   render() {
@@ -251,31 +254,22 @@ class Step extends Component {
       return style;
     }
 
-    incrementVelocity = (delta) => {
-      const oldValue = this.state.velocity;
-      let value = oldValue + delta;
+    onChangeVelocity = (value) => {
       if (value < 1) value = 1;
       if (value > 127) value = 127;
-      if (value === oldValue) return;
       this.setState({velocity : value}); 
     };
 
-    incrementGateTime = (delta) => {
-      const oldValue = this.state.gate_time;
-      let value = oldValue + delta;
+    onChangeGateTime = (value) => {
       if (value < 0) value = 0;
-      else if (value > 96 && delta == 1) value = 127;
-      else if (value > 96 && delta == -1) value = 96;
-      if (value === oldValue) return;
+      else if (value > 96 && value < 127) value = 127;
+      else if (value == 127) value = 96;
       this.setState({gate_time : value}); 
     };
 
-    incrementNote = (delta, idx) => {
-      const oldValue = this.state.notes[idx];
-      let value = oldValue + delta;
+    onChangeNote = (value, idx) => {
       if (value < 0) value = 0;
       if (value > 128) value = 128;
-      if (value === oldValue) return;
       const { notes } = this.state;
       notes[idx] = value; 
       this.setState({notes}); 
@@ -289,15 +283,14 @@ class Step extends Component {
       const n = notes.filter(e => e > 0).map(e => this.note2str(e));
       return <div className='part-step'>
         <button className='pad' style={style} onClick={() => this.setState({on_off : !on_off})}>
-          {[n[0], n[1]].join(' ') + '\n'}
-          {[n[2], n[3]].join(' ')}
+          {[n[0], n[1]].join(' ') + '\n' + [n[2], n[3]].join(' ')}
         </button>
 
         { selected ? notes.map((note, i) => {
-          return <NumberInput key={'note_'+i} onChange={d => this.incrementNote(d, i)}>{this.note2str(note)}</NumberInput>;
+          return <NumberInput key={'note_'+i} onChange={d => this.onChangeNote(d, i)}>{this.note2str(note)}</NumberInput>;
         }) : null }
-        { selected ? <NumberInput onChange={this.incrementVelocity} value={velocity}>{velocity}</NumberInput> : null }
-        { selected ? <NumberInput onChange={this.incrementGateTime} value={gate_time}>{gate_time}</NumberInput> : null }
+        { selected ? <NumberInput onChange={this.onChangeVelocity} value={velocity}>{velocity}</NumberInput> : null }
+        { selected ? <NumberInput onChange={this.onChangeGateTime} value={gate_time}>{gate_time}</NumberInput> : null }
         { selected ? <BooleanInput onChange={(v) => this.setState({on_off : v})} value={on_off} /> : null }
         { selected ? <BooleanInput onChange={(v) => this.setState({trigger_on_off : v})} value={trigger_on_off} /> : null }
       </div>;
