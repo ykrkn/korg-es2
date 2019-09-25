@@ -45,70 +45,34 @@ const PatternScaleMap = [
   [35, 'Octave', 'C'],
 ].map(e => [e[0]-1, e[1], e[2]]);
 
-class NumberInput extends Component {
+const note2str = (v) => {
+  if (v === 0) return '---';
+  let n = ((v - 1) % 12);
+  let o = Math.floor(v/11)-1;
+  return NotesMap[n] + o;
+};
 
-  constructor(props) {
-    super(props);
-    this.capture = false;
-    this.x = this.y = this.dx = this.dy = 0;
-    this.state = {};
+const NumberInput = ({value, onChange, onClick, labelRenderer, backgroundRenderer}) => {
+
+  const wheel = ({deltaY}) => {
+    if (undefined === onChange) return; 
+    const dy = deltaY >> 2;
+    if (dy > 0) value--;
+    if (dy < 0) value++;    
+    onChange(value);
   }
 
-  static getDerivedStateFromProps(props, state) { 
-    if (props.value !== state._value) return { 
-      _value : props.value, 
-      value : props.value 
-    };
-    return null;
+  const style = {};
+
+  if (backgroundRenderer !== undefined) {
+    const bgcolor = backgroundRenderer();
+    if (bgcolor !== null) style.backgroundColor = bgcolor;    
   }
 
-  down = (e) => {
-    console.log('down', e);
-    this.capture = true;
-    this.x = e.pageX;
-    this.y = e.pageY;
-    this.dx = e.pageX;
-    this.dy = e.pageY;
-    e.target.setPointerCapture(e.pointerId);
-  };
+  const label = labelRenderer ? labelRenderer(value) : value;
 
-  up = (e) => {
-    console.log('up', e);
-    this.capture = false;
-    e.target.releasePointerCapture(e.pointerId);
-  };
-
-  move = (e) => {
-    if (!this.capture) return;
-    this.dx = this.x - e.pageX;
-    this.dy = this.y - e.pageY;
-    this.x = e.pageX;
-    this.y = e.pageY;
-    let { value } = this.state;
-    if (this.dy > 0) value++;
-    if (this.dy < 0) value--;
-    this.setState({value});
-    if (undefined === this.props.onChange) return; 
-    this.props.onChange(value);
-  };
-
-  render() {
-    const { onClick, backgroundRenderer } = this.props;
-    const style = {};
-    const label = this.props.children || this.state.value;
-    if (this.props.backgroundRenderer !== undefined) {
-      const bgcolor = backgroundRenderer();
-      if (bgcolor !== null) style.backgroundColor = bgcolor;    
-    }
-
-    return (<button className='note' 
-      style={style}
-      onClick={onClick}
-      onPointerDown={this.down} 
-      onPointerUp={this.up} 
-      onPointerMove={this.move}>{label}
-    </button>);
-  }
+  return (<button className='note' style={style} onClick={onClick} onWheel = {wheel}>{label}</button>
+  );
 }
 
 class TextInput extends Component {
@@ -234,13 +198,6 @@ class Step extends Component {
       return null;
     }
 
-    note2str = (v) => {
-      if (v === 0) return '---';
-      let n = ((v - 1) % 12);
-      let o = Math.floor(v/11)-1;
-      return NotesMap[n] + o;
-    };
-
     createStyleByData() {
       const { velocity, on_off } = this.state;
       const style = {};
@@ -270,7 +227,8 @@ class Step extends Component {
     onChangeNote = (value, idx) => {
       if (value < 0) value = 0;
       if (value > 128) value = 128;
-      const { notes } = this.state;
+      console.log(value);
+      const notes = [...this.state.notes];
       notes[idx] = value; 
       this.setState({notes}); 
     };
@@ -280,14 +238,14 @@ class Step extends Component {
       const { selected } = this.props;
 
       const style = this.createStyleByData();
-      const n = notes.filter(e => e > 0).map(e => this.note2str(e));
+      const n = notes.filter(e => e > 0).map(note2str);
       return <div className='part-step'>
         <button className='pad' style={style} onClick={() => this.setState({on_off : !on_off})}>
           {[n[0], n[1]].join(' ') + '\n' + [n[2], n[3]].join(' ')}
         </button>
 
         { selected ? notes.map((note, i) => {
-          return <NumberInput key={'note_'+i} onChange={d => this.onChangeNote(d, i)}>{this.note2str(note)}</NumberInput>;
+          return <NumberInput key={'note_'+i} onChange={d => this.onChangeNote(d, i)} value={note} labelRenderer={note2str} />;
         }) : null }
         { selected ? <NumberInput onChange={this.onChangeVelocity} value={velocity}>{velocity}</NumberInput> : null }
         { selected ? <NumberInput onChange={this.onChangeGateTime} value={gate_time}>{gate_time}</NumberInput> : null }
@@ -373,9 +331,9 @@ class Pattern extends Component {
         super(props);
         this.state = {
           data : null,
-          viewState : Pattern.DetailsView,
+          viewState : Pattern.PatternView,
           selectedBar : 0,
-          selectedPart : -1,
+          selectedPart : 0,
           patternLength : 1,
         }
     }
@@ -387,7 +345,7 @@ class Pattern extends Component {
         return {
           data : data,
           selectedBar : 0,
-          selectedPart : -1,
+          selectedPart : 0,
         };
       }
       return null;
