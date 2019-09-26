@@ -110,7 +110,7 @@ const stringConverter = {
     unpack : (v) => {
         let r = "";
         for(let i=0; i<v.length; ++i) {
-            if (v[i] == 0) break;
+            if (v[i] === 0) break;
             r += String.fromCharCode(v[i]);        
         }
         return r;
@@ -124,17 +124,11 @@ const stringConverter = {
     }
 };
 
-const converters = {
-    'header' : stringConverter,
-    'footer' : stringConverter,
-    'name' : stringConverter
-};
-
 const ba2string = (chunk, ba) => {
     let s = "";
     for (let i = 0; i < chunk.length; i++) {
         let n = ba[chunk.offset+i];
-        if(n == 0) break;
+        if(n === 0) break;
         s = s.concat(String.fromCharCode(n));
     }
     return s;
@@ -146,31 +140,30 @@ const ba2byte = (chunk, ba) => {
 
 const ba2short = (chunk, ba) => {
     const _ba = ba.slice(chunk.offset, chunk.offset+chunk.length);
-    return (((_ba[1] & 0xFF) << 8) | _ba[0] & 0xFF);
+    return (((_ba[1] & 0xFF) << 8) | (_ba[0] & 0xFF));
 };
 
 const ba2int = (chunk, ba) => {
     const _ba = ba.slice(chunk.offset, chunk.offset+chunk.length);
-    return ((_ba[3] & 0xFF) << 24) | ((_ba[2] & 0xFF) << 16) | ((_ba[1] & 0xFF) << 8) | _ba[0] & 0xFF;
+    return ((_ba[3] & 0xFF) << 24) | ((_ba[2] & 0xFF) << 16) | ((_ba[1] & 0xFF) << 8) | (_ba[0] & 0xFF);
 };
-
 
 const DUMP_SIZE = 16384;
 
 class KorgES2Pattern {
 
-    constructor(source) {
+    loadAllPatternsDump(source) {
         this.source = source;
+        this.index = {};
         this.struct = this.multiplyType(korg_e2_pattern);
         const offset = this.calcOffset(this.struct, 0);
-        if (offset != DUMP_SIZE) throw new Error('Invalid struct size ' + offset);
-        this.structIndex = {};
-        this.data = this.unpack(this.struct, {}, '');
+        if (offset !== DUMP_SIZE) throw new Error('Invalid struct size ' + offset);
+        this.data = this.unpack(this.struct, {}, null);
     }
 
     import(data) {
         if (!Array.isArray(data)) { console.error('Invalid data'); return; }
-        if (data.length != DUMP_SIZE) { console.error('Invalid data size'); return; }
+        if (data.length !== DUMP_SIZE) { console.error('Invalid data size'); return; }
         this.data = data;
     }
 
@@ -179,7 +172,7 @@ class KorgES2Pattern {
         for(let i=0; i<type.length; ++i) {
             const prop = type[i];
             const o = {name:prop[0], size:prop[1], offset:0};
-            if (prop.length == 3) {
+            if (prop.length === 3) {
                 const iter = [];
                 for(let j=0; j<prop[1]; j++) {
                     iter.push([...prop[2]]);
@@ -221,15 +214,15 @@ class KorgES2Pattern {
             const e = src[i];
             if (e.name === 'header') continue;
             if (e.name === 'footer') continue;
-            if (e.name.indexOf('reserved') == 0) continue;
-            const path = ipath.split(':').concat(e.name).join(':');
+            if (e.name.indexOf('reserved') === 0) continue;
+            const path = ipath == null ? e.name : ipath.split(':').concat(e.name).join(':');
             if (e.iter !== undefined) {
                 sink[e.name] = e.iter.map((it, i) => this.unpack(it, {}, path+':'+i));
             } else {
                 const arr = this.source.slice(e.offset, e.offset+e.size);
                 sink[e.name] = this.arr2val(arr);
-                // const { size, offset } = e;
-                // this.structIndex[path] = {size, offset};
+                const { size, offset } = e;
+                this.index[path] = {size, offset};
             }
         }
         return sink;
@@ -237,13 +230,13 @@ class KorgES2Pattern {
 }
 
 const types = {
-    bool  : (val) => val[0] != 0,
+    bool  : (val) => val[0] !== 0,
     byte  : (val) => val[0],
-    short : (val) => (((val[1] & 0xFF) << 8) | val[0] & 0xFF),
+    short : (val) => (((val[1] & 0xFF) << 8) | (val[0] & 0xFF)),
     string : (val) => {
         let r = '';
         for(let i=0; i<val.length; ++i) {
-            if (val[i] == 0) break;
+            if (val[i] === 0) break;
             r += String.fromCharCode(val[i]);
         }
         return r;

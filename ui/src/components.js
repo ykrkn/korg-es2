@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { KorgES2Pattern, types } from './korg-es2';
 
+const service = new KorgES2Pattern();
+
 const PatternBeatMap = {0:'16', 1:'32', 2:'8T', 3:'16T'};
 
 const NotesMap = {0:'C', 1:'C♯', 2:'D', 3:'D♯', 4:'E', 5:'F', 6:'F♯', 7:'G', 8:'G♯', 9:'A', 10:'A♯', 11:'B'};
@@ -223,7 +225,7 @@ const PatternDetails = ({data, onChange}) => {
             onChange={(v) => onChange('chordset', v)} />
         </div>    
 
-        <div className='item'>
+        {/*<div className='item'>
           <legend>!Touch Scale</legend>
           <Selector 
             values={chordsetMap} 
@@ -237,7 +239,7 @@ const PatternDetails = ({data, onChange}) => {
             values={chordsetMap} 
             value={types.byte(data.chordset)} 
             onChange={(v) => onChange('chordset', v)} />
-        </div>
+        </div>*/}
 
         <div className='item'>
           <legend>Level</legend>
@@ -320,14 +322,13 @@ class PartStep extends Component {
     onChangeGateTime = (value) => {
       if (value < 0) value = 0;
       else if (value > 96 && value < 127) value = 127;
-      else if (value == 127) value = 96;
+      else if (value === 127) value = 96;
       this.setState({gate_time : value}); 
     };
 
     onChangeNote = (value, idx) => {
       if (value < 0) value = 0;
       if (value > 128) value = 128;
-      console.log(value);
       const notes = [...this.state.notes];
       notes[idx] = value; 
       this.setState({notes}); 
@@ -336,7 +337,7 @@ class PartStep extends Component {
     renderLabel(notes) {
       const n = notes.filter(e => e > 0).sort(sortnum);
       if (n.length > 1) return <strong style={{color:'white'}}>{note2str(n[0])}</strong>
-      if (n.length == 1) return note2str(n[0]);
+      if (n.length === 1) return note2str(n[0]);
       else return null;
     }
 
@@ -353,8 +354,8 @@ class PartStep extends Component {
           return <NumberInput key={'note_'+i} onChange={d => this.onChangeNote(d, i)} value={note} labelRenderer={note2str} />;
         }) : null }
 
-        { selected ? <NumberInput onChange={this.onChangeVelocity} value={velocity}>{velocity}</NumberInput> : null }
-        { selected ? <NumberInput onChange={this.onChangeGateTime} value={gate_time}>{gate_time}</NumberInput> : null }
+        { selected ? <NumberInput onChange={this.onChangeVelocity} value={velocity} /> : null }
+        { selected ? <NumberInput onChange={this.onChangeGateTime} value={gate_time} /> : null }
         { selected ? <BooleanInput onChange={(on_off) => this.setState({on_off})} value={on_off} /> : null }
         { selected ? <BooleanInput onChange={(trigger_on_off) => this.setState({trigger_on_off})} value={trigger_on_off} /> : null }
       </div>;
@@ -520,26 +521,19 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.datasetPromise = async () => {
-      const response = await fetch('/ds.json');
-      return response.json();
-    };
-    this.getDataset();
   }
 
-  getDataset = async () => {
-    const json = await this.datasetPromise();
-
-    // 138 - 2 bars
-    // 243 - init
+  async componentDidMount() {
+    const response = await fetch('/ds.json');
+    const json = await response.json();
+    // 138 - 2 bars, 243 - init
     const id = Math.round(Math.random()*json.length); 
-
     console.log("Pattern " + id);
-    const dump = new KorgES2Pattern(json[id]);
-    window.d = dump;
-    // debugger;
-    this.setState({pattern : dump.data});
-  };
+    
+    service.loadAllPatternsDump(json[id]);
+    window.s = service;
+    this.setState({pattern : service.data});
+  }
 
   render() {
     const { pattern } = this.state;
