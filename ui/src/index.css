@@ -37,7 +37,7 @@ select {
 }
 
 .bars-buttons button {
-  min-width: 34px;
+  min-width: 32px;
   height: 27px;
   margin: 1px;
 }
@@ -46,18 +46,14 @@ select {
   background:#9c0186;
 }
 
-.part {
+.Part {
   display: flex;
-}
-
-.part-toggle {
-
 }
 
 .toggle-button {
   outline: 0;
-  min-width: 34px;
-  height: 34px;
+  min-width: 32px;
+  height: 32px;
   margin: 1px;
   padding:0;
 }
@@ -80,14 +76,11 @@ button.toggle.selected {
   width: 1092px;
 }
 
-.pattern-details {
-}
-
 .pattern-details .row {
   padding: 4px;
 }
 
-.part-details {
+.PartDetails {
   background: rgb(79, 77, 79);
   height: 143px;
   width: 1124px;
@@ -96,24 +89,24 @@ button.toggle.selected {
   transition: transform .5s;
 }
 
-.part-details.hidden {
+.PartDetails.hidden {
   transform: translate(-1089px, 0);
 }
 
-.part-details.hidden button.close {
+.PartDetails.hidden button.close {
   display: none;
 }
 
-.part-details.visible {
+.PartDetails.visible {
   transform: translate(0, 0);
 }
 
-.part-details.visible button.open {
+.PartDetails.visible button.open {
   display: none;
 }
 
-.part-details button.open,
-.part-details button.close
+.PartDetails button.open,
+.PartDetails button.close
 {
   border: none;
   position: inherit;
@@ -123,11 +116,11 @@ button.toggle.selected {
   color: black;
 }
 
-.part-details button.open { 
+.PartDetails button.open { 
   right: 0;
 }
 
-.part-details button.close { 
+.PartDetails button.close { 
   left: 0;
 }
 
@@ -135,18 +128,18 @@ button.toggle.selected {
   direction: ltr !important;
   display: flex;
   flex-direction: row;
-  width: 1091px;
 }
 
-.part-step {
+.PartStep {
   display: flex;
   flex-direction: column;
-  width:68px;
 }
 
-.part-step .pad {
-  height: 34px;
-  padding: 0 8px;
+.PartStep .pad {
+  width:40px; 
+  height: 40px;
+  font-size:12px;
+  padding: 0;
   margin: 1px;
   color:#adadad;
   border-radius: 4px;
@@ -154,23 +147,7 @@ button.toggle.selected {
   border: 1px solid rgb(138, 138, 138);
 }
 
-.part-step .note {
+.PartStep .note {
   border: none;
   margin:1px;
-}
-
-.part-step-pad.selected {
-  background: rgba(255, 0, 0, 0.3);
-}
-
-.part-step-pad.disabled {
-  border-style: dashed;
-}
-
-.part-step-pad:hover {
-  background: rgba(0, 0, 255, 0.3);
-}
-
-.part-step-pad.selected:hover {
-  background: rgba(255, 0, 255, 0.3);
 }

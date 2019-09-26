@@ -52,6 +52,8 @@ const note2str = (v) => {
   return NotesMap[n] + o;
 };
 
+const sortnum = (a, b) => a-b;
+
 const NumberInput = ({value, onChange, onClick, labelRenderer, backgroundRenderer}) => {
 
   const wheel = ({deltaY}) => {
@@ -163,7 +165,7 @@ class Selector extends Component {
   }
 }
 
-class Step extends Component {
+class PartStep extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -233,20 +235,26 @@ class Step extends Component {
       this.setState({notes}); 
     };
 
+    renderLabel(notes) {
+      const n = notes.filter(e => e > 0).sort(sortnum);
+      if (n.length > 1) return <strong style={{color:'white'}}>{note2str(n[0])}</strong>
+      if (n.length == 1) return note2str(n[0]);
+      else return null;
+    }
+
     render() {      
       const { notes, velocity, gate_time, on_off, trigger_on_off } = this.state;
       const { selected } = this.props;
 
       const style = this.createStyleByData();
-      const n = notes.filter(e => e > 0).map(note2str);
-      return <div className='part-step'>
-        <button className='pad' style={style} onClick={() => this.setState({on_off : !on_off})}>
-          {[n[0], n[1]].join(' ') + '\n' + [n[2], n[3]].join(' ')}
-        </button>
+
+      return <div className='PartStep'>
+        <button className='pad' style={style} onClick={() => this.setState({on_off : !on_off})}>{this.renderLabel(notes)}</button>
 
         { selected ? notes.map((note, i) => {
           return <NumberInput key={'note_'+i} onChange={d => this.onChangeNote(d, i)} value={note} labelRenderer={note2str} />;
         }) : null }
+
         { selected ? <NumberInput onChange={this.onChangeVelocity} value={velocity}>{velocity}</NumberInput> : null }
         { selected ? <NumberInput onChange={this.onChangeGateTime} value={gate_time}>{gate_time}</NumberInput> : null }
         { selected ? <BooleanInput onChange={(v) => this.setState({on_off : v})} value={on_off} /> : null }
@@ -266,9 +274,9 @@ class Part extends Component {
     render() {
         const { data, firstStep, selected } = this.props;
         const steps = data.steps.slice(firstStep, firstStep+16);        
-        return <div className="part">
+        return <div className="Part">
             <div className="steps-row">
-                {steps.map((e, i) => <Step key={i} idx={firstStep+i} data={e} selected={selected} />)}
+                {steps.map((e, i) => <PartStep key={i} idx={firstStep+i} data={e} selected={selected} />)}
             </div>  
         </div>;
     }
@@ -284,7 +292,7 @@ class PartDetails extends Component {
 
   render() {
     const { visible } = this.state;
-    return <div className={'part-details ' + (visible ? 'visible' : 'hidden')}>
+    return <div className={'PartDetails ' + (visible ? 'visible' : 'hidden')}>
       <button className='open' onClick={() => this.setState({visible : true})}>&rarr;</button>
       <button className='close' onClick={() => this.setState({visible : false})}>&larr;</button>
 
