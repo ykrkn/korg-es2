@@ -1,0 +1,195 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  font-size: 12px;
+  background: #292c27;
+}
+
+* {
+  user-select: none;
+  color: #9a9a9a;
+  box-sizing: border-box;
+}
+
+select {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0px;
+  border: 1px solid rgb(79, 77, 79);
+  background: #2c3534;
+  padding: 1px 4px;
+  min-width: 24px;
+}
+
+button, input { 
+  border: 1px solid rgb(79, 77, 79);
+  background: #2c3534;
+}
+
+button:focus, select:focus, input:focus {
+  outline:none;
+}
+
+button {
+  outline: 0;
+  margin: 1px;
+  padding:0;
+  &.selected {
+    background: #9100ff;
+  }
+
+  &.number:hover {
+    cursor: ns-resize;
+    background: #4e5154;
+  }
+}
+
+$pad-width: 40px;
+$pad-height: 40px;
+
+.Pattern {
+  width: 800px;
+  .pattern-menu {
+    display: flex;
+    button {
+      min-width: 32px;
+      height: 27px;
+      margin: 1px;
+      padding: 4px 8px;
+      &.selected {
+        background:#9c0186;
+      }
+    }
+    .sizer {
+      flex-grow: 1;
+    }
+  }
+
+  .pattern-details {
+    display: flex;
+
+    .col:nth-child(n+2) {
+      margin-left: 20px;
+    }
+
+    button.number {
+      text-align: left;
+      padding: 0 4px;
+    }
+    
+    input {
+      padding: 0 4px;
+    }
+
+    .item {
+      display: flex;
+      padding: 4px 0;
+      & > * {
+        width: 128px;
+        font-size: 16px;
+        border: none;
+      }
+
+      legend {
+        border-bottom: 1px dashed rgb(79, 77, 79);
+      }
+    }
+  }
+
+  .Part {
+    display: flex;
+  
+    .part-menu {
+      display: flex;
+      flex-direction: column;
+  
+      button.toggle {
+        width: 128px;
+        height: $pad-height;
+        font-size: 20px;
+  
+        &.selected {
+          background:#4a6d27;
+        }
+      }
+  
+      .label {
+        text-align: right;
+        margin: 1px;
+        height: 16px;
+        padding-right: 4px;
+       }
+    }
+
+    .PartStep {
+      display: flex;
+      flex-direction: column;
+    
+      .pad {
+        width:$pad-width; 
+        height: $pad-height;
+        font-size:12px;
+        padding: 0;
+        margin: 1px;
+        color:#adadad;
+        border-radius: 4px;
+        outline: 0;
+        border: 1px solid rgb(138, 138, 138);
+      }
+    
+      .number {
+        border: none;
+        height: 16px;
+      }
+
+      .toggle {
+        height: 16px;
+      }
+    }
+  }
+}
+
+
+.PartDetails {
+  background: rgb(79, 77, 79);
+  height: 143px;
+  width: 1124px;
+  position: absolute;
+  padding: 4px 40px;
+  transition: transform .5s;
+
+  .hidden {
+    transform: translate(-1089px, 0);
+
+    button.close {
+      display: none;
+    }
+  }
+  .visible {
+    transform: translate(0, 0);
+
+    button.open {
+      display: none;
+    }
+  }
+  button.open,
+  button.close
+  {
+    border: none;
+    position: inherit;
+    top:0;
+    width: 36px;
+    background: #2abb1c;
+    color: black;
+  }
+
+  button.open { 
+    right: 0;
+  }
+
+  button.close { 
+    left: 0;
+  }
+}

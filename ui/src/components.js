@@ -73,8 +73,7 @@ const NumberInput = ({value, onChange, onClick, labelRenderer, backgroundRendere
 
   const label = labelRenderer ? labelRenderer(value) : value;
 
-  return (<button className='note' style={style} onClick={onClick} onWheel = {wheel}>{label}</button>
-  );
+  return (<button className='number' style={style} onClick={onClick} onWheel = {wheel}>{label}</button>);
 }
 
 class TextInput extends Component {
@@ -103,33 +102,9 @@ class TextInput extends Component {
   }
 }
 
-class BooleanInput extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};  
-  }
-
-  static getDerivedStateFromProps(props, state) { 
-    if (props.value !== state._value) return { 
-      _value : props.value, 
-      value : props.value 
-    };
-    return null;
-  }
-
-  onChange() {
-    const v = !this.state.value;
-    this.setState({value : v});
-    if (this.props.onChange) {
-      this.props.onChange(v);
-    }
-  }
-
-  render() {
-    const { value } = this.state;
-    const cn = 'toggle' + (value ? ' selected' : '');
-    return <button className={cn} onClick={() => this.onChange()}>{value ? 'ON' : 'OFF'}</button>
-  }
+const BooleanInput = ({value, onChange}) => {
+  const cn = 'toggle' + (value ? ' selected' : '');
+  return <button className={cn} onClick={() => onChange(!value)}>{value ? 'ON' : 'OFF'}</button>
 }
 
 class Selector extends Component {
@@ -165,6 +140,129 @@ class Selector extends Component {
   }
 }
 
+const PatternDetails = ({data, onChange}) => {
+  const beatMap = PatternBeatMap;
+  const keyMap = NotesMap;
+  const scaleMap = PatternScaleMap.reduce((acc, x) => { acc[x[0]] = x[1]; return acc; }, {});
+  const chordsetMap = PatternChordsetMap;
+
+  return <div className='pattern-details'>
+    <div className='col'>
+      <div className='item'>
+          <legend>Pattern Name</legend> 
+          <TextInput 
+            value={types.string(data.name)} 
+            onChange={(v) => onChange('name', v)}/>
+        </div>
+        <div className='item'>
+          <legend>Tempo</legend>
+          <NumberInput 
+            value={.1*types.short(data.tempo)} min={20} max={300}
+            onChange={(v) => onChange('tempo', 10*v)} />
+        </div>
+        
+        <div className='item'>
+          <legend>Length</legend>
+          <NumberInput 
+            value={types.byte(data.length)} min={0} max={3}
+            onChange={(v) => onChange('length', v)} />
+        </div>
+                
+        <div className='item'>
+          <legend>!Swing</legend>
+          <NumberInput 
+            value={types.byte(data.swing)} 
+            onChange={(v) => onChange('swingFIXME', v)}/>
+        </div>
+        
+        <div className='item'>
+          <legend>Beat</legend>
+          <Selector 
+            values={beatMap} 
+            value={types.byte(data.beat)} 
+            onChange={(v) => onChange('beat', v)} />
+        </div>
+
+        <div className='item'>
+          <legend>ALT 13/14</legend>
+          <BooleanInput 
+            value={types.bool(data.alt_1314)} 
+            onChange={(v) => onChange('alt_1314', v)} />
+        </div>
+        
+        <div className='item'>
+          <legend>ALT 15/16</legend>
+          <BooleanInput 
+            value={types.bool(data.alt_1516)} 
+            onChange={(v) => onChange('alt_1516', v)} />
+        </div>
+    </div>
+
+    <div className='col'>
+      <div className='item'>
+          <legend>Key</legend>
+          <Selector 
+            values={keyMap} 
+            value={types.byte(data.key)} 
+            onChange={(v) => onChange('key', v)} />
+        </div>
+        
+        <div className='item'>
+          <legend>Scale</legend>
+          <Selector 
+            values={scaleMap} 
+            value={types.byte(data.scale)} 
+            onChange={(v) => onChange('scale', v)} />
+        </div>
+        
+        <div className='item'>
+          <legend>ChordSet</legend>
+          <Selector 
+            values={chordsetMap} 
+            value={types.byte(data.chordset)} 
+            onChange={(v) => onChange('chordset', v)} />
+        </div>    
+
+        <div className='item'>
+          <legend>!Touch Scale</legend>
+          <Selector 
+            values={chordsetMap} 
+            value={types.byte(data.chordset)} 
+            onChange={(v) => onChange('chordset', v)} />
+        </div>
+
+        <div className='item'>
+          <legend>!Master FX</legend>
+          <Selector 
+            values={chordsetMap} 
+            value={types.byte(data.chordset)} 
+            onChange={(v) => onChange('chordset', v)} />
+        </div>
+
+        <div className='item'>
+          <legend>Level</legend>
+          <NumberInput 
+            value={127-types.byte(data.level)} min={0} max={127}
+            onChange={(v) => onChange('level', 127-v)} />
+        </div>
+    </div>        
+
+{/* ['name',18], // null terminated
+['tempo',2], // 200~3000 = 20.0 ~ 300.0 UInt16LE
+['swing',1], // -48 ~ 48
+['length',1], // 0~3 = 1~4bar(s)
+['beat',1], // 0, 1, 2, 3 = 16,32,8 Tri, 16 Tri
+['key',1], // 0~11 = C~B
+['scale',1], // 0~35
+['chordset',1], // 0~4
+['level',1], // 127 ~ 0 = 0 ~ 127
+['touch_scale',1,korg_e2_touch_scale],
+['master_fx',1,korg_e2_master_fx],
+['alt_1314',1], // 0~1=OFF,ON
+['alt_1516',1], // 0~1=OFF,ON */}
+  </div>
+}
+
 class PartStep extends Component {
     constructor(props) {
         super(props);
@@ -179,7 +277,7 @@ class PartStep extends Component {
     }
 
     static getDerivedStateFromProps(props, state) {      
-      if (state.data != props.data) {
+      if (state.data !== props.data) {
         const { data } = props; 
         console.log('getDerivedStateFromProps');
         return {
@@ -257,8 +355,8 @@ class PartStep extends Component {
 
         { selected ? <NumberInput onChange={this.onChangeVelocity} value={velocity}>{velocity}</NumberInput> : null }
         { selected ? <NumberInput onChange={this.onChangeGateTime} value={gate_time}>{gate_time}</NumberInput> : null }
-        { selected ? <BooleanInput onChange={(v) => this.setState({on_off : v})} value={on_off} /> : null }
-        { selected ? <BooleanInput onChange={(v) => this.setState({trigger_on_off : v})} value={trigger_on_off} /> : null }
+        { selected ? <BooleanInput onChange={(on_off) => this.setState({on_off})} value={on_off} /> : null }
+        { selected ? <BooleanInput onChange={(trigger_on_off) => this.setState({trigger_on_off})} value={trigger_on_off} /> : null }
       </div>;
     }
 }
@@ -272,12 +370,27 @@ class Part extends Component {
     }
 
     render() {
-        const { data, firstStep, selected } = this.props;
-        const steps = data.steps.slice(firstStep, firstStep+16);        
+        const { data, firstStep, selected, idx, onSelect } = this.props;
+        const steps = data.steps.slice(firstStep, firstStep+16);   
+        
+        const stepLabels = selected ? [
+          <div className='label'>&nbsp;</div>,
+          <div className='label'>&nbsp;</div>,
+          <div className='label'>&nbsp;</div>,
+          <div className='label'>&nbsp;</div>,
+          <div className='label'>Velocity</div>,
+          <div className='label'>Gate Time</div>,
+          <div className='label'>Step Enabled</div>,
+          <div className='label'>Trigger Enabled</div>,
+        ] : null;
+
         return <div className="Part">
-            <div className="steps-row">
-                {steps.map((e, i) => <PartStep key={i} idx={firstStep+i} data={e} selected={selected} />)}
-            </div>  
+                  <div className='part-menu'>
+                    <button onClick={() => onSelect(idx)} className={'toggle' + (selected ? ' selected' : '')}>{(1+idx)}</button>
+                    { stepLabels } 
+                    {/* { selected ? <PartDetails data={data} /> : null }  */}
+                  </div>
+                  {steps.map((e, i) => <PartStep key={i} idx={firstStep+i} data={e} selected={selected} />)}
         </div>;
     }
 }
@@ -332,14 +445,14 @@ class PartDetails extends Component {
 class Pattern extends Component {
 
     static DetailsView = 1;
-    static PatternView = 2;
+    static PartsView = 2;
     static MotionsView = 3;
 
     constructor(props) {
         super(props);
         this.state = {
           data : null,
-          viewState : Pattern.PatternView,
+          viewState : Pattern.DetailsView,
           selectedBar : 0,
           selectedPart : 0,
           patternLength : 1,
@@ -347,7 +460,7 @@ class Pattern extends Component {
     }
 
     static getDerivedStateFromProps(props, state) {      
-      if (state.data != props.data) {
+      if (state.data !== props.data) {
         const { data } = props; 
         console.log('getDerivedStateFromProps');
         return {
@@ -363,100 +476,19 @@ class Pattern extends Component {
       const { selectedBar } = this.state;
       return <button key={idx} 
         onClick={() => this.setState({selectedBar : idx})} 
-        className={selectedBar == idx ? 'selected' : null}>{idx+1}</button>;
+        className={selectedBar === idx ? 'selected' : null}>{idx+1}</button>;
     }
 
     renderPart(data, idx) {
       const { selectedBar, selectedPart } = this.state;
-
-      const selectPart = () => {
-        if (selectedPart === idx) 
-          this.setState({selectedPart : -1});
-        else   
-          this.setState({selectedPart : idx});
-      };
-
-      return <div class='part'>
-        <div class='part-toggle'>
-          <button onClick={selectPart}
-            className={'toggle-button' + (selectedPart === idx ? ' selected' : '')}>{(1+idx)}</button>
-            { selectedPart === idx ? <PartDetails data={data} /> : null } 
-        </div>
-        <Part data={data} firstStep={16*selectedBar} selected={selectedPart === idx} />
-      </div>
+      return (<Part data={data} idx={idx} 
+        firstStep={16*selectedBar} 
+        selected={selectedPart === idx} 
+        onSelect={(selectedPart) => this.setState({selectedPart})} />);
     }
 
-    onChangePatternProperty(pname, value) {
+    onChangePatternProperty = (pname, value) => {
       console.log(pname, value);
-    }
-
-    renderPatternDetails(data) {
-      const beatMap = PatternBeatMap;
-      const keyMap = NotesMap;
-      const scaleMap = PatternScaleMap.reduce((acc, x) => { acc[x[0]] = x[1]; return acc; }, {});
-      const chordsetMap = PatternChordsetMap;
-
-      return <div className='pattern-details'>
-            <div className='row'>Name 
-              <TextInput value={types.string(data.name)} onChange={(v) => this.onChangePatternProperty('name', v)}/>
-            </div>
-            <div className='row'>Tempo
-              <NumberInput value={.1*types.short(data.tempo)} min={20} max={300}
-                           onChange={(v) => this.onChangePatternProperty('tempo', 10*v)} />
-            </div>
-            
-            <div className='row'>Length
-              <NumberInput value={types.byte(data.length)} min={0} max={3}
-                            onChange={(v) => this.onChangePatternProperty('length', v)} />
-            </div>
-            
-            <div className='row'>Level
-              <NumberInput value={127-types.byte(data.level)} min={0} max={127}
-                              onChange={(v) => this.onChangePatternProperty('level', 127-v)} />
-            </div>
-            
-            <div className='row'>Swing
-              <NumberInput value={types.byte(data.swing)} onChange={(v) => this.onChangePatternProperty('swingFIXME', v)}/>
-            </div>
-            
-            <div className='row'>Beat
-              <Selector values={beatMap} value={types.byte(data.beat)} onChange={(v) => this.onChangePatternProperty('beat', v)} />
-            </div>
-            
-            <div className='row'>Key
-              <Selector values={keyMap} value={types.byte(data.key)} onChange={(v) => this.onChangePatternProperty('key', v)} />
-            </div>
-            
-            <div className='row'>Scale
-              <Selector values={scaleMap} value={types.byte(data.scale)} onChange={(v) => this.onChangePatternProperty('scale', v)} />
-            </div>
-            
-            <div className='row'>Chord set
-              <Selector values={chordsetMap} value={types.byte(data.chordset)} onChange={(v) => this.onChangePatternProperty('chordset', v)} />
-            </div>
-            
-            <div className='row'>Alt 1314
-              <BooleanInput value={types.bool(data.alt_1314)} onChange={(v) => this.onChangePatternProperty('alt_1314', v)} />
-            </div>
-            
-            <div className='row'>Alt 1516
-              <BooleanInput value={types.bool(data.alt_1516)} onChange={(v) => this.onChangePatternProperty('alt_1516', v)} />
-            </div>
-
-    {/* ['name',18], // null terminated
-    ['tempo',2], // 200~3000 = 20.0 ~ 300.0 UInt16LE
-    ['swing',1], // -48 ~ 48
-    ['length',1], // 0~3 = 1~4bar(s)
-    ['beat',1], // 0, 1, 2, 3 = 16,32,8 Tri, 16 Tri
-    ['key',1], // 0~11 = C~B
-    ['scale',1], // 0~35
-    ['chordset',1], // 0~4
-    ['level',1], // 127 ~ 0 = 0 ~ 127
-    ['touch_scale',1,korg_e2_touch_scale],
-    ['master_fx',1,korg_e2_master_fx],
-    ['alt_1314',1], // 0~1=OFF,ON
-    ['alt_1516',1], // 0~1=OFF,ON */}
-      </div>
     }
 
     render() {
@@ -465,19 +497,19 @@ class Pattern extends Component {
       const { parts } = data;
       const arr = [0, 1, 2, 3];
 
-      return (<div className='pattern'>
-        <div className='bars-buttons'>
-          <button onClick={() => this.setState({viewState : Pattern.DetailsView})}
-            className={(viewState === Pattern.DetailsView ? 'selected' : null)}>Pattern Details</button>
-          <button onClick={() => this.setState({viewState : Pattern.PatternView})}
-            className={(viewState === Pattern.PatternView ? 'selected' : null)}>Parts</button>
+      return (<div className='Pattern'>
+        <div className='pattern-menu'>
+        <button onClick={() => this.setState({viewState : Pattern.DetailsView})}
+            className={(viewState === Pattern.DetailsView ? 'selected' : null)}>&#9776;</button>
+          <button onClick={() => this.setState({viewState : Pattern.PartsView})}
+            className={(viewState === Pattern.PartsView ? 'selected' : null)}>Parts</button>
           <button onClick={() => this.setState({viewState : Pattern.MotionsView})}
             className={(viewState === Pattern.MotionsView ? 'selected' : null)}>Motions</button>
-          {viewState === Pattern.PatternView || viewState === Pattern.MotionsView 
+          {viewState === Pattern.PartsView || viewState === Pattern.MotionsView 
             ? arr.map(idx => this.renderBarButton(idx)) : null}
         </div>
-          {viewState === Pattern.DetailsView ? this.renderPatternDetails(data) : null}
-          {viewState === Pattern.PatternView ? parts.map((e, i) => this.renderPart(e, i)) : null}
+          {viewState === Pattern.DetailsView ? <PatternDetails data={data} onChange={this.onChangePatternProperty} /> : null}
+          {viewState === Pattern.PartsView ? parts.map((e, i) => this.renderPart(e, i)) : null}
           {viewState === Pattern.MotionsView ? 'Motions will be here' : null}
         </div>);
     }
