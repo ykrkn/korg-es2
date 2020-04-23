@@ -1,4 +1,4 @@
-package com.ykrkn.electribe;
+package ykrkn.es2;
 
 public final class Constants {
     public final static int PATTERNS_COUNT = 250;

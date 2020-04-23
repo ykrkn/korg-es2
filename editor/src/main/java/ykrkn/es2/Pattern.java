@@ -1,6 +1,4 @@
-package com.ykrkn.electribe;
-
-import java.nio.ByteBuffer;
+package ykrkn.es2;
 
 /*
 TABLE 1 : Pattern Parameter ( 1 Pattern, Current Pattern )
@@ -120,7 +118,7 @@ TABLE 4 : Master Fx Paramter
 +-------------+-------------------+--------------------------------------+
 */
 
-public class Pattern extends ESObject {
+public class Pattern {
 
     Parameter[] parameters = new Parameter[] {
         Parameter.stringParameter("header", 0, 4),

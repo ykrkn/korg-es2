@@ -1,4 +1,4 @@
-package com.ykrkn.electribe;
+package ykrkn.es2;
 
 import java.util.Arrays;
 import java.util.function.Function;

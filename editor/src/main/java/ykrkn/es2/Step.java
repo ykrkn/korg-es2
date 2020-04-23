@@ -1,4 +1,4 @@
-package com.ykrkn.electribe;
+package ykrkn.es2;
 
 /*
  +-------------+--------------------------+--------------------------------------+
@@ -18,7 +18,7 @@ package com.ykrkn.electribe;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-public class Step extends ESObject {
+public class Step {
 
     final int index;
 
@@ -31,8 +31,7 @@ public class Step extends ESObject {
     public Step(int index) {
         this.index = index;
     }
-
-    @Override
+    
     void readFromBuffer(ByteBuffer buffer) {
         enabled = buffer.get();
         gateTime = buffer.get();

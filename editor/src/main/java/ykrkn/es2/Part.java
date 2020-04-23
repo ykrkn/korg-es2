@@ -1,4 +1,4 @@
-package com.ykrkn.electribe;
+package ykrkn.es2;
 
 import java.nio.ByteBuffer;
 
@@ -100,7 +100,7 @@ TABLE 6 :Part Parameter
 | 741~752     | Step64 Step Data         | (same as Step1 Step Data)            |
 +-------------+--------------------------+--------------------------------------+
 */
-public class Part extends ESObject {
+public class Part {
 
     int index;
     byte lastStep;
@@ -134,11 +134,23 @@ public class Part extends ESObject {
     byte oscGlide;
     Step[] steps = new Step[Constants.STEPS_COUNT];
 
+    // Dirty Stub
+    private ByteBuffer buffer;
+
+    // Dirty Stub
+    private void read(int i, int i1) {
+
+    }
+
+    // Dirty Stub
+    private byte readByte(int i) {
+        return 0;
+    }
+
     Part(int index) {
         this.index = index;
     }
-
-    @Override
+    
     void readFromBuffer(ByteBuffer buffer) {
         this.buffer = buffer;
 
@@ -150,7 +162,7 @@ public class Part extends ESObject {
         scaleMode = readByte(5);
         partPriority = readByte(6);
         readByte(7);
-        oscType = bytea2short(read(8, 9));
+        oscType = 0;// FIXME:read(8, 9);
         readByte(10);
         oscEdit = readByte(11);
         filterType = readByte(12);

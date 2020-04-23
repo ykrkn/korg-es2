@@ -1,4 +1,4 @@
-package com.ykrkn.electribe;
+package ykrkn.es2;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,7 +9,13 @@ import java.util.Arrays;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        String filename = "/Users/yurykrikun/src/korg-es2/assets/data.bin";
+        byte[] src = Files.readAllBytes(Paths.get("/Users/sx/Desktop/e2sSample.all"));
+        ES2AllSamplesDumpStruct samplesDumpStruct = ES2AllSamplesDumpStruct.unpack(src);
+        samplesDumpStruct.trace();
+    }
+
+    public static void main0(String[] args) throws IOException {
+        String filename = "/Users/sx/src/korg-es2/assets/data.bin";
         System.out.println(filename);
         Path path = Paths.get(filename);
         byte[] data = Files.readAllBytes(path);
