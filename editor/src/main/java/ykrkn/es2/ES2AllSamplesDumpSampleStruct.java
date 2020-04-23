@@ -56,6 +56,10 @@ public class ES2AllSamplesDumpSampleStruct implements Serializable {
     @StructField(order = 9)
     public byte[] waveData;
 
+
+
+
+    
     // korg..esli subchunk Header with size = 1172
     @StructField(order = 10)
     public byte[] pad3 = new byte[16];
