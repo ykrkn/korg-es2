@@ -25,10 +25,14 @@ public class ES2AllSamplesDumpStruct implements Serializable {
     @StructField(order = 2)
     public int[] sampleOffsets = new int[1000];
 
+    transient private byte[] source;
+
     transient private final Map<Integer, ES2AllSamplesDumpSampleStruct> samples = new LinkedHashMap<>();
     
     public static ES2AllSamplesDumpStruct unpack(byte[] src) {
         final ES2AllSamplesDumpStruct o = new ES2AllSamplesDumpStruct();
+        o.source = src;
+
         try {
             // Header
             JavaStruct.unpack(o, Arrays.copyOfRange(src, 0, 4096), ByteOrder.LITTLE_ENDIAN);
@@ -63,6 +67,29 @@ public class ES2AllSamplesDumpStruct implements Serializable {
     public void trace() {
         for (Integer offset : samples.keySet()) {
             System.out.println("" + offset + " " + samples.get(offset));
+        }
+    }
+
+    public byte[] pack() {
+        byte[] sink = Arrays.copyOf(source, source.length);
+
+        try {
+            // Header
+            byte[] header = JavaStruct.pack(this, ByteOrder.LITTLE_ENDIAN);
+            for (int i = 0; i < header.length; i++) {
+                sink[i] = header[i];
+            }
+            // Samples
+            for (int offset : samples.keySet()) {
+                if (offset == 0) continue;
+                byte[] sample = JavaStruct.pack(samples.get(offset), ByteOrder.LITTLE_ENDIAN);
+                for (int i = 0; i < sample.length; i++) {
+                    sink[i+offset] = sample[i];
+                }
+            }
+            return sink;
+        } catch (StructException e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 }

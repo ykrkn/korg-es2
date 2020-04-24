@@ -112,7 +112,7 @@ public class ES2AllSamplesDumpSampleStruct implements Serializable {
     // Offset 52 (0x0034): Loop flag as a 8-bit integer: 0 = loop, 1 = one-shot.
     @StructField(order = 21)
     public byte loop;
-
+    
     // Offset 54 (0x0035): Seven nulls.
     // Offset 60 (0x003C): Data length of the WAVE file.
     // Offset 64 (0x0040): The byte 0x01.
