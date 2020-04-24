@@ -1,6 +1,5 @@
 package ykrkn.es2;
 
-import org.w3c.dom.ls.LSOutput;
 import ykrkn.es2.api.SampleService;
 
 import java.io.IOException;
@@ -15,7 +14,9 @@ public class Main {
         try {
             SampleService service = new SampleService();
             service.initWithDump(Paths.get("/Users/sx/Desktop/e2sSample.all"));
-            service.getAllSamples().forEach(System.out::println);
+            service.getAllSamples().forEach(e -> {
+                System.out.println(e);
+            });
             System.out.println(service.getFreeMemorySeconds());
         } catch (Exception e) {
             e.printStackTrace();

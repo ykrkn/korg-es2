@@ -4,12 +4,7 @@ import struct.JavaStruct;
 import struct.StructException;
 import ykrkn.es2.Constants;
 
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,33 +26,31 @@ public class SampleService {
     transient final SamplesDumpSampleStruct[] samples = new SamplesDumpSampleStruct[1000];
 
     public void initWithDump(Path path) throws IOException {
-        byte[] src = Files.readAllBytes(path);
-        unpack(src);
-        if (!validateSignature()) {
-            throw new InvalidStructError("Invalid File signature");
-        }
-        trace();
+        unpack(Files.readAllBytes(path));
     }
 
     public List<SampleVO> getAllSamples() {
         final List<SampleVO> res = new LinkedList<>();
-        for (int i = 0; i < samples.length; i++) {
+        for (int i=0; i<SAMPLES_LENGTH; ++i) {
+            int offset = struct.sampleOffsets[i];
+            if (offset == 0) continue;
             SamplesDumpSampleStruct sample = samples[i];
-            if (sample == null) continue;
-            res.add(SampleVO.fromStruct(i, sample));
+            res.add(SampleVO.fromStruct(offset, sample));
         }
+
         return res;
     }
-
+    
     public int getFreeMemorySeconds() {
         return Constants.SAMPLE_MEMORY_SEC - ((source.length - Constants.SAMPLE_ALL_HEADER_SIZE) / 100000);
     }
 
-    private boolean validateSignature() {
-        return Objects.equals(Constants.SAMPLE_ALL_SIGNATURE, struct.signature.toString());
-    }
-
     public void unpack(byte[] src) {
+        String signature = new String(Arrays.copyOf(src, Constants.SAMPLE_ALL_SIGNATURE.length()));
+        if (!Objects.equals(Constants.SAMPLE_ALL_SIGNATURE, signature)) {
+            throw new InvalidStructError("Invalid signature");
+        }
+        
         struct = new SamplesDumpStruct();
         source = src;
 
@@ -72,16 +65,6 @@ public class SampleService {
                 SamplesDumpSampleStruct s = new SamplesDumpSampleStruct();
                 JavaStruct.unpack(s, Arrays.copyOfRange(src, offset, src.length), ByteOrder.LITTLE_ENDIAN);
                 samples[i] = s;
-
-                try {
-                    InputStream is = new ByteArrayInputStream(Arrays.copyOfRange(src, offset, offset+1024));
-                    AudioFileFormat aff = AudioSystem.getAudioFileFormat(is);
-                    System.out.println(aff);
-                } catch (UnsupportedAudioFileException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         } catch (StructException e) {
             throw new InvalidStructError(e);

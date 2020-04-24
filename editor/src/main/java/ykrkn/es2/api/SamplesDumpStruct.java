@@ -1,18 +1,10 @@
 package ykrkn.es2.api;
 
-import struct.*;
-import ykrkn.es2.Constants;
+import struct.CString;
+import struct.StructClass;
+import struct.StructField;
 
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
-import java.nio.ByteOrder;
-import java.util.Arrays;
-import java.util.Objects;
 
 @StructClass
 public class SamplesDumpStruct implements Serializable {

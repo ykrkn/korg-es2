@@ -1,17 +1,19 @@
 package ykrkn.es2.api;
 
 import lombok.Getter;
+import lombok.Setter;
 import ykrkn.es2.Category;
 
 import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioSystem;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 @Getter
 public final class SampleVO {
 
-    private SamplesDumpSampleStruct struct;
+    private final SamplesDumpSampleStruct struct;
 
     private int offset;
     private int number;
@@ -19,16 +21,31 @@ public final class SampleVO {
     private String name;
     private Category category;
 
-    private SampleVO() {}
+    @Setter
+    private AudioFileFormat audioFileFormat;
+
+    private SampleVO(SamplesDumpSampleStruct struct) {
+         this.struct = struct;
+    }
 
     public static SampleVO fromStruct(int offset, SamplesDumpSampleStruct struct) {
-        SampleVO o = new SampleVO();
+        SampleVO o = new SampleVO(struct);
         o.offset = offset;
         o.number = struct.number;
         o.absNumber = struct.absNumber;
         o.name = struct.name.toString();
         o.category = Category.values()[struct.category];
         return o;
+    }
+
+    public InputStream getAudioStream() {
+        ByteBuffer buf = ByteBuffer.allocate(struct.riff.length + struct.dataSize + 4);
+        buf.order(ByteOrder.LITTLE_ENDIAN);
+        buf.put(struct.riff);
+        buf.putInt(struct.dataSize);
+        buf.put(struct.waveData);
+        buf.flip();
+        return new ByteArrayInputStream(buf.array());
     }
     
     @Override
@@ -39,6 +56,7 @@ public final class SampleVO {
                 ", absNumber=" + absNumber +
                 ", name=" + name +
                 ", category=" + category +
+                ", audioFileFormat=" + audioFileFormat +
                 '}';
     }
 }
