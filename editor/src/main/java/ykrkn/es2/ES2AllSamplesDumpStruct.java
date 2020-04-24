@@ -17,12 +17,9 @@ public class ES2AllSamplesDumpStruct implements Serializable {
     private static final String SIGNATURE = "e2s sample all";
 
     @StructField(order = 0)
-    public CString signature = new CString(14);
+    public CString signature = new CString(88);
 
     @StructField(order = 1)
-    public byte[] pad1 = new byte[74];
-
-    @StructField(order = 2)
     public int[] sampleOffsets = new int[1000];
 
     transient private byte[] source;
@@ -35,7 +32,7 @@ public class ES2AllSamplesDumpStruct implements Serializable {
 
         try {
             // Header
-            JavaStruct.unpack(o, Arrays.copyOfRange(src, 0, 4096), ByteOrder.LITTLE_ENDIAN);
+            JavaStruct.unpack(o, Arrays.copyOfRange(src, 0, Constants.SAMPLE_ALL_HEADER_SIZE), ByteOrder.LITTLE_ENDIAN);
 
             if(!o.validateSignature()) {
                 throw new RuntimeException("Invalid File Format");
@@ -56,6 +53,11 @@ public class ES2AllSamplesDumpStruct implements Serializable {
         }
     }
 
+    public int getFreeMemorySeconds() {
+        // TODO: not quite sure 
+        return Constants.SAMPLE_MEMORY_SEC - ((source.length - Constants.SAMPLE_ALL_HEADER_SIZE) / 100000);
+    }
+    
     private boolean validateSignature() {
         return Objects.equals(SIGNATURE, signature.toString());
     }

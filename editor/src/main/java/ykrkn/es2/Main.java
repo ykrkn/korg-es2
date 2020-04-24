@@ -12,6 +12,7 @@ public class Main {
         byte[] src = Files.readAllBytes(Paths.get("/Users/sx/Desktop/e2sSample.all"));
         ES2AllSamplesDumpStruct samplesDumpStruct = ES2AllSamplesDumpStruct.unpack(src);
         samplesDumpStruct.trace();
+        System.out.println(samplesDumpStruct.getFreeMemorySeconds());
     }
 
     public static void main0(String[] args) throws IOException {

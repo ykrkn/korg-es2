@@ -1,6 +1,8 @@
 package ykrkn.es2;
 
 public final class Constants {
+    public final static int SAMPLE_ALL_HEADER_SIZE = 4096;
+    public final static int SAMPLE_MEMORY_SEC = 270;
     public final static int PATTERNS_COUNT = 250;
     public final static int PATTERNS_FILE_OFFSET = 0x10100;
     public final static int PATTERN_BLOCK_SIZE = 16384;
