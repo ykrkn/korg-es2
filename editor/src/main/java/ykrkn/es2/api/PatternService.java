@@ -44,7 +44,8 @@ public class PatternService implements Service {
 
     @Override
     public byte[] pack() {
-        return new byte[0];
+        System.out.println("pack IS Not Implemented");
+        return source;
     }
 
     @Override

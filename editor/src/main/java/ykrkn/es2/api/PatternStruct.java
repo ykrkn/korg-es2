@@ -96,7 +96,7 @@ public class PatternStruct implements Serializable {
     @StructField(order = 1)  public int size;
     @StructField(order = 2)  public int pad1;
     @StructField(order = 3)  public int version;
-    @StructField(order = 4)  public CString name = new CString(16);
+    @StructField(order = 4)  public CString name = new CString(18);
     @StructField(order = 5)  public short tempo;
     @StructField(order = 6)  public byte swing;
     @StructField(order = 7)  public byte length;
@@ -106,6 +106,7 @@ public class PatternStruct implements Serializable {
     @StructField(order = 11) public byte chordset;
     @StructField(order = 12) public byte level;
     @StructField(order = 13) public byte pad2;
+    
     @StructField(order = 14) public TouchScaleStruct touchScale = new TouchScaleStruct();
     @StructField(order = 15) public MasterFxStruct masterFx = new MasterFxStruct();
     @StructField(order = 16) public byte alt1314;
@@ -125,8 +126,8 @@ public class PatternStruct implements Serializable {
     @StructField(order = 22)
     public byte[] pad5 = new byte[252];
 
-    // 'PTED' = 44455450[HEX]
     @StructField(order = 23)
+    // 'PTED' = 44455450[HEX]
     public int footer;
 
     public void validate() {
