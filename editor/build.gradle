@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id "com.github.johnrengelman.shadow" version "5.2.0"
+    id 'io.franzbecker.gradle-lombok' version '1.14'
 }
 
 group 'com.ykrkn'
@@ -13,6 +14,11 @@ mainClassName = 'ykrkn.es2.Main'
 
 repositories {
     mavenCentral()
+}
+
+lombok {
+    version = '1.18.4'
+    sha256 = ""
 }
 
 dependencies {

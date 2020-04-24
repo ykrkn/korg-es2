@@ -1,6 +1,7 @@
 package ykrkn.es2;
 
 public final class Constants {
+    public final static String SAMPLE_ALL_SIGNATURE = "e2s sample all";
     public final static int SAMPLE_ALL_HEADER_SIZE = 4096;
     public final static int SAMPLE_MEMORY_SEC = 270;
     public final static int PATTERNS_COUNT = 250;

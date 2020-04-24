@@ -1,5 +1,8 @@
 package ykrkn.es2;
 
+import org.w3c.dom.ls.LSOutput;
+import ykrkn.es2.api.SampleService;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,11 +11,16 @@ import java.util.Arrays;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
-        byte[] src = Files.readAllBytes(Paths.get("/Users/sx/Desktop/e2sSample.all"));
-        ES2AllSamplesDumpStruct samplesDumpStruct = ES2AllSamplesDumpStruct.unpack(src);
-        samplesDumpStruct.trace();
-        System.out.println(samplesDumpStruct.getFreeMemorySeconds());
+    public static void main(String[] args) {
+        try {
+            SampleService service = new SampleService();
+            service.initWithDump(Paths.get("/Users/sx/Desktop/e2sSample.all"));
+            service.getAllSamples().forEach(System.out::println);
+            System.out.println(service.getFreeMemorySeconds());
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     public static void main0(String[] args) throws IOException {

@@ -1,9 +1,10 @@
-package ykrkn.es2;
+package ykrkn.es2.api;
 
 import struct.ArrayLengthMarker;
 import struct.CString;
 import struct.StructClass;
 import struct.StructField;
+import ykrkn.es2.Category;
 
 import java.io.Serializable;
 
@@ -11,7 +12,7 @@ import java.io.Serializable;
 // https://gist.github.com/jack126guy/b2d38db0c96ca247ae1ad385e011fd78
 
 @StructClass
-public class ES2AllSamplesDumpSampleStruct implements Serializable {
+public class SamplesDumpSampleStruct implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -124,25 +125,4 @@ public class ES2AllSamplesDumpSampleStruct implements Serializable {
     // Offset 77 (0x004C): Sample tune as an 8-bit signed two's-complement integer.
     // Offset 78 (0x004E): Zero-based sample number again.
     
-    @Override
-    public String toString() {
-        return "ES2AllSamplesDumpSampleStruct{" +
-                "audioFormat=" + audioFormat +
-                ", numChannels=" + numChannels +
-                ", sampleRate=" + sampleRate +
-                ", byteRate=" + byteRate +
-                ", blockAlign=" + blockAlign +
-                ", bitsPerSample=" + bitsPerSample +
-                ", dataSize=" + dataSize +
-                ", number=" + number +
-                ", name=" + name +
-                ", category=" + Category.values()[category] +
-                ", absNumber=" + absNumber +
-                ", volume=" + volume +
-                ", startPoint=" + startPoint +
-                ", loopPoint=" + loopPoint +
-                ", endPoint=" + endPoint +
-                ", loop=" + loop +
-                '}';
-    }
 }
