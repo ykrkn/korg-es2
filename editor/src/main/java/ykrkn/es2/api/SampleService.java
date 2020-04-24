@@ -4,7 +4,9 @@ import struct.JavaStruct;
 import struct.StructException;
 import ykrkn.es2.Constants;
 
+import javax.sound.sampled.*;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,20 +15,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-public class SampleService {
+public class SampleService implements Service {
 
     static final int FIRST_SLOT_NUM = 19;
 
     static final int SAMPLES_LENGTH = 1000;
 
+    byte[] source;
+
     private SamplesDumpStruct struct;
 
-    transient byte[] source;
-
-    transient final SamplesDumpSampleStruct[] samples = new SamplesDumpSampleStruct[1000];
-
-    public void initWithDump(Path path) throws IOException {
-        unpack(Files.readAllBytes(path));
+    final SamplesDumpSampleStruct[] samples = new SamplesDumpSampleStruct[1000];
+    
+    public void initWithDump(Path path) throws InvalidStructError {
+        try {
+            unpack(Files.readAllBytes(path));
+        } catch (IOException e) {
+            throw new InvalidStructError(e);
+        }
     }
 
     public List<SampleVO> getAllSamples() {
@@ -40,11 +46,26 @@ public class SampleService {
 
         return res;
     }
-    
+
+    public void playSound(SampleVO sample) {
+        try (Clip clip = AudioSystem.getClip();
+             InputStream is = sample.getAudioStream();
+             AudioInputStream stream = AudioSystem.getAudioInputStream(is)
+        ) {
+            clip.open(stream);
+            clip.start();
+            clip.drain();
+            Thread.currentThread().sleep(clip.getMicrosecondLength() / 1000);
+        } catch (LineUnavailableException | InterruptedException | IOException | UnsupportedAudioFileException e) {
+            e.printStackTrace();
+        }
+    }
+
     public int getFreeMemorySeconds() {
         return Constants.SAMPLE_MEMORY_SEC - ((source.length - Constants.SAMPLE_ALL_HEADER_SIZE) / 100000);
     }
 
+    @Override
     public void unpack(byte[] src) {
         String signature = new String(Arrays.copyOf(src, Constants.SAMPLE_ALL_SIGNATURE.length()));
         if (!Objects.equals(Constants.SAMPLE_ALL_SIGNATURE, signature)) {
@@ -78,6 +99,7 @@ public class SampleService {
         }
     }
 
+    @Override
     public byte[] pack() {
         byte[] sink = Arrays.copyOf(source, source.length);
 
