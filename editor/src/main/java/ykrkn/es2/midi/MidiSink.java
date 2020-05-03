@@ -1,4 +1,4 @@
-package ykrkn.es2;
+package ykrkn.es2.midi;
 
 import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiMessage;
@@ -30,7 +30,7 @@ public class MidiSink extends MidiIO {
             return;
         }
 
-        System.out.println(this + " <- " + MidiFacade.trace(msg));
+        System.out.println(this + " <- " + Utils.trace(msg));
         rx.send(msg, -1);
     }
 

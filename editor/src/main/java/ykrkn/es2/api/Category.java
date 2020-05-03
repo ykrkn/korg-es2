@@ -1,4 +1,4 @@
-package ykrkn.es2;
+package ykrkn.es2.api;
 
 public enum Category {
     Analog,

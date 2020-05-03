@@ -1,4 +1,4 @@
-package ykrkn.es2;
+package ykrkn.es2.midi;
 
 public class SysexActionError extends RuntimeException {
 

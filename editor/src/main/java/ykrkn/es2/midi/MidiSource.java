@@ -1,4 +1,4 @@
-package ykrkn.es2;
+package ykrkn.es2.midi;
 
 import javax.sound.midi.*;
 
@@ -31,7 +31,7 @@ public class MidiSource extends MidiIO {
         public void send(MidiMessage msg, long timeStamp) {
             // TODO: clock is here
             if (msg.getMessage()[0] == -8) return;
-            System.out.println(MidiSource.this + " -> " + MidiFacade.trace(msg));
+            System.out.println(MidiSource.this + " -> " + Utils.trace(msg));
             subscriber.onMessage(msg);
         }
 

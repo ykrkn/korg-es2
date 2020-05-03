@@ -1,9 +1,8 @@
-package ykrkn.es2;
+package ykrkn.es2.midi;
 
 import uk.co.xfactorylibrarians.coremidi4j.CoreMidiDeviceProvider;
 
 import javax.sound.midi.MidiDevice;
-import javax.sound.midi.MidiMessage;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import java.util.HashSet;
@@ -68,21 +67,4 @@ public class MidiFacade {
                 .findAny().orElse(null);
     }
 
-    public static String trace(MidiMessage message) {
-        return trace(message.getMessage());
-    }
-
-    public static String trace(byte[] a) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < a.length; i++) {
-            if (i == 32) {
-                sb.append("...");
-            } else if (i > 32 && i < a.length - 8) {
-                continue;
-            } else {
-                sb.append(String.format("%02x", a[i])).append(' ');
-            }
-        }
-        return sb.toString();
-    }
 }

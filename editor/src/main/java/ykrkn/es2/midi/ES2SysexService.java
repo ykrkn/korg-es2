@@ -1,4 +1,4 @@
-package ykrkn.es2;
+package ykrkn.es2.midi;
 
 import struct.JavaStruct;
 import struct.StructClass;
@@ -117,7 +117,7 @@ public class ES2SysexService {
             }
 
             ba = Arrays.copyOfRange(ba, 7, ba.length-1);
-            ba = sysex2data(ba);
+            ba = Utils.sysex2data(ba);
             PatternStruct p = new PatternStruct();
 
             try {
@@ -129,21 +129,6 @@ public class ES2SysexService {
             }
         }
 
-        // https://blogs.bl0rg.net/netzstaub/2008/08/14/encoding-8-bit-data-in-midi-sysex/
-        byte[] sysex2data(byte[] ba) {
-            byte[] data = new byte[0];
-            int bits = 0;
-            for (int i = 0, j = 0; i < ba.length; i++) {
-                if ((i % 8) == 0) {
-                    bits = ba[i];
-                } else {
-                    data = Arrays.copyOf(data, data.length+1);
-                    data[j++] = (byte) (ba[i] | ((bits & 1) << 7));
-                    bits >>= 1;
-                }
-            }
-            return data;
-        }
     }
 
     /**

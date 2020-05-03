@@ -1,4 +1,4 @@
-package ykrkn.es2;
+package ykrkn.es2.midi;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiMessage;

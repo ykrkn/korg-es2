@@ -1,6 +1,7 @@
 package ykrkn.es2;
 
 import ykrkn.es2.api.SampleService;
+import ykrkn.es2.midi.*;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.ShortMessage;
@@ -31,7 +32,7 @@ public class Main {
         MidiSink output = midi.findSink("nanoKONTROL2 CTRL");
 
         input.subscribe(msg -> {
-            System.out.println(MidiFacade.trace(msg));
+            System.out.println(Utils.trace(msg));
             //output.send(msg);
         });
 
