@@ -1,4 +1,4 @@
-package ykrkn.es2.api;
+package ykrkn.es2.struct;
 
 import struct.StructClass;
 import struct.StructField;

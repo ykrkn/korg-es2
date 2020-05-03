@@ -3,6 +3,8 @@ package ykrkn.es2.api;
 import struct.JavaStruct;
 import struct.StructException;
 import ykrkn.es2.Constants;
+import ykrkn.es2.struct.InvalidStructError;
+import ykrkn.es2.struct.PatternStruct;
 
 import java.io.IOException;
 import java.nio.ByteOrder;

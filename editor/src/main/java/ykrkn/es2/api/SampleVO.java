@@ -3,6 +3,7 @@ package ykrkn.es2.api;
 import lombok.Getter;
 import lombok.Setter;
 import ykrkn.es2.Category;
+import ykrkn.es2.struct.SamplesDumpSampleStruct;
 
 import javax.sound.sampled.AudioFileFormat;
 import java.io.ByteArrayInputStream;

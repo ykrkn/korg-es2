@@ -4,7 +4,7 @@ import struct.JavaStruct;
 import struct.StructClass;
 import struct.StructException;
 import struct.StructField;
-import ykrkn.es2.api.PatternStruct;
+import ykrkn.es2.struct.PatternStruct;
 
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.SysexMessage;
