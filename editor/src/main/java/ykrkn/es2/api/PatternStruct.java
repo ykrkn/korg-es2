@@ -134,4 +134,19 @@ public class PatternStruct implements Serializable {
         if (header != 0x54535450) throw new InvalidStructError("Invalid header");
         if (footer != 0x44455450) throw new InvalidStructError("Invalid footer");
     }
+
+    @Override
+    public String toString() {
+        return "PatternStruct{" +
+                "name=" + name.toString() +
+                ", tempo=" + tempo +
+                ", swing=" + swing +
+                ", length=" + length +
+                ", beat=" + beat +
+                ", key=" + key +
+                ", scale=" + scale +
+                ", chordset=" + chordset +
+                ", level=" + level +
+                '}';
+    }
 }

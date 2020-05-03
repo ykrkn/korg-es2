@@ -17,5 +17,9 @@ abstract class MidiIO {
         this.facade = facade;
     }
 
+    public String getDescription() {
+        return device.getDeviceInfo().getDescription();
+    }
+
     public abstract void open();
 }

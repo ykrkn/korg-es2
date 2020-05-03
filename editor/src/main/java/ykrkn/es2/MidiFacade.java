@@ -1,5 +1,7 @@
 package ykrkn.es2;
 
+import uk.co.xfactorylibrarians.coremidi4j.CoreMidiDeviceProvider;
+
 import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.MidiSystem;
@@ -18,7 +20,7 @@ public class MidiFacade {
 
     public static MidiFacade start() throws MidiUnavailableException {
         final MidiFacade instance = new MidiFacade();
-        MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
+        MidiDevice.Info[] infos = CoreMidiDeviceProvider.getMidiDeviceInfo();
         for (int i = 0; i < infos.length; i++) {
             MidiDevice.Info info = infos[i];
             System.out.println("==============");
@@ -48,10 +50,14 @@ public class MidiFacade {
                 .map(MidiSink.class::cast);
     }
 
-    public MidiSource findSource(String description) {
+    public Stream<MidiSource> getSources() {
         return io.stream()
                 .filter(e -> MidiSource.class.isInstance(e))
-                .map(MidiSource.class::cast)
+                .map(MidiSource.class::cast);
+    }
+
+    public MidiSource findSource(String description) {
+        return getSources()
                 .filter(d -> d.getDevice().getDeviceInfo().getDescription().equals(description))
                 .findAny().orElse(null);
     }
@@ -63,15 +69,15 @@ public class MidiFacade {
     }
 
     public static String trace(MidiMessage message) {
-        return ba2str(message.getMessage());
+        return trace(message.getMessage());
     }
 
-    private static String ba2str(byte[] a) {
+    public static String trace(byte[] a) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < a.length; i++) {
-            if (i == 99) {
+            if (i == 32) {
                 sb.append("...");
-            } else if (i > 99 && i < a.length - 8) {
+            } else if (i > 32 && i < a.length - 8) {
                 continue;
             } else {
                 sb.append(String.format("%02x", a[i])).append(' ');

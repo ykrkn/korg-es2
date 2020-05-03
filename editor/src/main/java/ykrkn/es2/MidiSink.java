@@ -24,11 +24,18 @@ public class MidiSink extends MidiIO {
 
     public void send(MidiMessage msg) {
         if (!device.isOpen()) open();
+
+        if (rx == null) {
+            System.out.println("RX IS NULL " + this);
+            return;
+        }
+
+        System.out.println(this + " <- " + MidiFacade.trace(msg));
         rx.send(msg, -1);
     }
 
     @Override
     public String toString() {
-        return device.getDeviceInfo().getDescription() + " IN" ;
+        return getDescription() + " IN" ;
     }
 }

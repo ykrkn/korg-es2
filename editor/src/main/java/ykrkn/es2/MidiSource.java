@@ -26,10 +26,12 @@ public class MidiSource extends MidiIO {
         if (!device.isOpen()) open();
     }
 
-    class MidiInputReceiver implements MidiDeviceReceiver {
+    private final class MidiInputReceiver implements MidiDeviceReceiver {
 
         public void send(MidiMessage msg, long timeStamp) {
-            if (!ShortMessage.class.isInstance(msg)) return;
+            // TODO: clock is here
+            if (msg.getMessage()[0] == -8) return;
+            System.out.println(MidiSource.this + " -> " + MidiFacade.trace(msg));
             subscriber.onMessage(msg);
         }
 
@@ -43,6 +45,6 @@ public class MidiSource extends MidiIO {
 
     @Override
     public String toString() {
-        return device.getDeviceInfo().getDescription() + " OUT" ;
+        return getDescription() + " OUT" ;
     }
 }

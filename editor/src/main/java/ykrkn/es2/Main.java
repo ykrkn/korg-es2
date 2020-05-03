@@ -4,7 +4,6 @@ import ykrkn.es2.api.SampleService;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.ShortMessage;
-import javax.sound.midi.SysexMessage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,15 +15,14 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         MidiFacade midi = MidiFacade.start();
-        midi.getSinks().forEach(sink -> {
-            try {
-                SysexMessage msg = new SysexMessage(new byte[]{(byte) 0xF0, 0x42, 0x50, 0x00, (byte) 0xDD, (byte) 0xF7}, 6);
-                System.out.println(sink + " <- " + MidiFacade.trace(msg));
-                sink.send(msg);
-            } catch (InvalidMidiDataException e) {
-                e.printStackTrace();
-            }
-        });
+        ES2SysexService service = new ES2SysexService(midi);
+        // TODO: think about ...
+        service.reloadPatternWhenDeviceChanged(true);
+
+        service.start()
+                .thenCompose((code) -> service.patternDump())
+                .thenAccept((pattern) -> System.out.println(pattern.toString()))
+                .get();
     }
 
     public static void main2(String[] args) throws Exception {
