@@ -1,5 +1,6 @@
 package ykrkn.es2;
 
+import reactor.core.publisher.Mono;
 import ykrkn.es2.api.SampleService;
 import ykrkn.es2.midi.*;
 
@@ -17,13 +18,11 @@ public class Main {
     public static void main(String[] args) throws Exception {
         MidiFacade midi = MidiFacade.start();
         ES2SysexService service = new ES2SysexService(midi);
-        // TODO: think about ...
-        service.reloadPatternWhenDeviceChanged(true);
 
         service.start()
-                .thenCompose((code) -> service.patternDump())
-                .thenAccept((pattern) -> System.out.println(pattern.toString()))
-                .get();
+                .flatMap(started -> started ? service.patternDump() : Mono.empty())
+                .log()
+                .subscribe();
     }
 
     public static void main2(String[] args) throws Exception {

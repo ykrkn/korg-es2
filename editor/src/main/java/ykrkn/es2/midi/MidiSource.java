@@ -21,9 +21,13 @@ public class MidiSource extends MidiIO {
     }
 
     public void subscribe(MidiSubscriber subscriber) {
-        // TODO: remove previous
+        // TODO: remove previous if any or throw?
         this.subscriber = subscriber;
         if (!device.isOpen()) open();
+    }
+
+    public void unsubscribe() {
+        this.subscriber = (msg) -> {};
     }
 
     private final class MidiInputReceiver implements MidiDeviceReceiver {

@@ -1,5 +1,6 @@
 package ykrkn.es2.midi;
 
+import reactor.core.publisher.Mono;
 import struct.JavaStruct;
 import struct.StructClass;
 import struct.StructException;
@@ -9,42 +10,34 @@ import ykrkn.es2.struct.PatternStruct;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.SysexMessage;
 import java.nio.ByteOrder;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public class ES2SysexService {
 
-    static final int KORG_SX_ID = 0x42;
-
     private final MidiFacade midi;
 
-    private MidiSource source;
+    private MidiSource currentSource;
 
-    private MidiSink sink;
+    private MidiSink currentSink;
 
     private int globalChannel;
-
-    private boolean reloadPatternWhenDeviceChanged;
 
     public ES2SysexService(MidiFacade midi) {
         this.midi = midi;
     }
 
-    public CompletableFuture<Boolean> start() {
+    public Mono<Boolean> start() {
         SearchDevice action = new SearchDevice();
-        return action.apply();
+        return action.request();
     }
 
-    public CompletableFuture<PatternStruct> patternDump() {
+    public Mono<PatternStruct> patternDump() {
         PatternDump action = new PatternDump();
-        return action.apply();
-    }
-
-    public void reloadPatternWhenDeviceChanged(boolean reloadPatternWhenDeviceChanged) {
-        this.reloadPatternWhenDeviceChanged = reloadPatternWhenDeviceChanged;
+        return action.request();
     }
 
     /**
@@ -75,28 +68,30 @@ public class ES2SysexService {
      *  Receive this message & data, save them to Edit Buffer and transmits Func=23 or Func=24 message.
      *  Receive Func=10 message, and transmits this message & data from Edit Buffer.
      */
-    private final class PatternDump implements MidiSubscriber {
-
-        private static final int CURRENT_PATTERN_DUMP_REQ = 0x10;
-        private static final int CURRENT_PATTERN_DUMP_RES = 0x40;
-        private static final int DATA_LOAD_ERROR_RES = 0x24;
+    private final class PatternDump implements SysexExchange<PatternStruct>, MidiSubscriber {
 
         private CompletableFuture future;
 
-        private final byte[] header = new byte[] {
-                ES2SysexService.KORG_SX_ID,
-                (byte)(0x30 | globalChannel),
-                0x00, 0x01, 0x24
-        };
+        private final byte[] header = Utils.byteArray()
+                .append(Constants.SYSTEM_EXCLUSIVE)
+                .append(Constants.KORG_SX_ID)
+                .append(0x30 | globalChannel)
+                .append(new byte[]{0x00, 0x01, 0x24})
+                .build();
 
-        CompletableFuture<PatternStruct> apply() {
-            future = new CompletableFuture().orTimeout(10, TimeUnit.SECONDS);
-            source.subscribe(this);
-            byte[] ba = Arrays.copyOf(header, header.length+1);
-            ba[ba.length-1] = CURRENT_PATTERN_DUMP_REQ;
-            MidiMessage msg = Messages.sysex(ba);
-            sink.send(msg);
-            return future;
+        @Override
+        public Mono<PatternStruct> request() {
+            future = new CompletableFuture();
+            currentSource.subscribe(this);
+
+            byte[] ba = Utils.byteArray(header)
+                    .append(Constants.CURRENT_PATTERN_DUMP_REQ)
+                    .append(Constants.END_OF_EXCLUSIVE)
+                    .build();
+
+            MidiMessage msg = Utils.message(ba);
+            currentSink.send(msg);
+            return Mono.fromFuture(future);
         }
 
         @Override
@@ -106,12 +101,12 @@ public class ES2SysexService {
             byte[] h = Arrays.copyOfRange(ba, 1, 6);
             if (!Arrays.equals(header, h)) return;
 
-            if (ba[6] == DATA_LOAD_ERROR_RES) {
+            if (ba[6] == Constants.DATA_LOAD_ERROR_RES) {
                 future.completeExceptionally(new SysexActionError("DATA LOAD ERROR", ba[6]));
                 return;
             }
 
-            if (ba[6] != CURRENT_PATTERN_DUMP_RES) {
+            if (ba[6] != Constants.CURRENT_PATTERN_DUMP_RES) {
                 future.completeExceptionally(new SysexActionError("ERROR", ba[6]));
                 return;
             }
@@ -169,59 +164,85 @@ public class ES2SysexService {
      * |     F7     | END OF EXCLUSIVE                             |
      * +------------+----------------------------------------------+
      */
-    private final class SearchDevice {
-
-        private static final int SEARCH_DEVICE_FUNC = 0x50;
-
-        private static final int SEARCH_DEVICE_REQ  = 0x00;
-
-        private static final int SEARCH_DEVICE_RES  = 0x01;
+    private final class SearchDevice implements SysexExchange<Boolean> {
 
         final Map<Integer, MidiSink> echo2sink = new HashMap<>();
 
-        private CompletableFuture future;
+        final CompletableFuture<Boolean> future;
 
-        private CompletableFuture apply() {
-            future = new CompletableFuture().orTimeout(10, TimeUnit.SECONDS);
+        private byte[] header = Utils.byteArray()
+                .append(Constants.SYSTEM_EXCLUSIVE)
+                .append(Constants.KORG_SX_ID)
+                .append(Constants.SEARCH_DEVICE_FUNC)
+                .append(Constants.SEARCH_DEVICE_REQ)
+                .build();
 
-            midi.getSources().forEach(source -> {
-                source.subscribe(msg -> {
-                    try {
-                        if (msg.getStatus() != SysexMessage.SYSTEM_EXCLUSIVE) return;
-                        byte[] data = msg.getMessage();
-                        if (data[1] != ES2SysexService.KORG_SX_ID) return;
-                        if (data[2] != SEARCH_DEVICE_FUNC) return;
-                        if (data[3] != SEARCH_DEVICE_RES) return;
-                        SearchDeviceResponseStruct s = new SearchDeviceResponseStruct();
-                        JavaStruct.unpack(s, Arrays.copyOfRange(data, 4, data.length-1));
+        private SearchDevice() {
+            future = new CompletableFuture<>();
+            subscribeAllSources();
+        }
 
-                        if (s.es2id != SearchDeviceResponseStruct.ES2_ID) return;
-
-                        MidiSink sink = echo2sink.get(Byte.toUnsignedInt(s.echo));
-
-                        if (sink == null) {
-                            future.completeExceptionally(new RuntimeException("Sink NOT Found " + s));
-                        }
-
-                        ES2SysexService.this.source = source;
-                        ES2SysexService.this.sink = sink;
-                        ES2SysexService.this.globalChannel = Byte.toUnsignedInt(s.channel);
-
-                        future.complete(true);
-                    } catch (StructException e) {
-                        future.completeExceptionally(e);
+        private void subscribeAllSources() {
+            midi.getSources().forEach(source -> source.subscribe(msg -> {
+                try {
+                    if (msg.getStatus() != SysexMessage.SYSTEM_EXCLUSIVE) {
+                        return;
                     }
-                });
-            });
 
+                    byte[] data = msg.getMessage();
+
+                    if (data[1] != Constants.KORG_SX_ID
+                            ||  data[2] != Constants.SEARCH_DEVICE_FUNC
+                            ||  data[3] != Constants.SEARCH_DEVICE_RES
+                    ) {
+                        return;
+                    }
+
+                    SearchDeviceResponseStruct s = new SearchDeviceResponseStruct();
+                    JavaStruct.unpack(s, Arrays.copyOfRange(data, 4, data.length-1));
+
+                    if (s.es2id != SearchDeviceResponseStruct.ES2_ID) {
+                        return;
+                    }
+
+                    MidiSink sink = echo2sink.get(Byte.toUnsignedInt(s.echo));
+
+                    if (sink == null) {
+                        throw new SysexExchangeError("Sink NOT Found " + s);
+                    }
+
+                    currentSource = source;
+                    currentSink = sink;
+                    globalChannel = Byte.toUnsignedInt(s.channel);
+                    future.complete(true);
+                } catch (Exception e) {
+                    future.completeExceptionally(e);
+                } finally {
+                    if (currentSource != source) {
+                        source.unsubscribe();
+                    }
+                }
+            }));
+        }
+
+
+        @Override
+        public Mono<Boolean> request() {
             midi.getSinks().forEach(sink -> {
                 int echo = (int)(127 * Math.random());
                 echo2sink.put(echo, sink);
-                MidiMessage msg = Messages.sysex(ES2SysexService.KORG_SX_ID, SEARCH_DEVICE_FUNC, SEARCH_DEVICE_REQ, echo);
+
+                byte[] ba = Utils.byteArray(header)
+                        .append(echo)
+                        .append(Constants.END_OF_EXCLUSIVE)
+                        .build();
+
+                MidiMessage msg = Utils.message(ba);
                 sink.send(msg);
             });
 
-            return future;
+            return Mono.fromFuture(future)
+                    .timeout(Duration.ofSeconds(4), Mono.just(false));
         }
     }
 
