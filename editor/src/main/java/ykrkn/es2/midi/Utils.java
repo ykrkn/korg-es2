@@ -1,9 +1,6 @@
 package ykrkn.es2.midi;
 
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiMessage;
-import javax.sound.midi.ShortMessage;
-import javax.sound.midi.SysexMessage;
+import javax.sound.midi.*;
 import java.util.Arrays;
 
 public final class Utils {
@@ -42,9 +39,20 @@ public final class Utils {
         return sb.toString();
     }
 
+    public static String trace(MidiDevice device) {
+        final StringBuilder sb = new StringBuilder();
+        final MidiDevice.Info info = device.getDeviceInfo();
+        sb.append("vendor=").append(info.getVendor()).append(',');
+        sb.append("name=").append(info.getName()).append(',');
+        sb.append("desc=").append(info.getDescription()).append(',');
+        sb.append("rx=").append(device.getMaxReceivers()).append(',');
+        sb.append("tx=").append(device.getMaxTransmitters());
+        return sb.toString();
+    }
+
     public static MidiMessage message(byte[] data) {
         if (data.length == 0) {
-            throw new SysexExchangeError("Empty data");
+            throw new SysexExchangeException("Empty data");
         }
 
         try {
@@ -55,7 +63,7 @@ public final class Utils {
                 return new ShortMessage(data[0], data[1], data[2]);
             }
         } catch (InvalidMidiDataException e) {
-            throw new SysexExchangeError(e);
+            throw new SysexExchangeException(e);
         }
     }
 

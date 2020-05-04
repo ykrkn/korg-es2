@@ -9,8 +9,8 @@ public class MidiSink extends MidiIO {
 
     private Receiver rx;
 
-    public MidiSink(MidiDevice device, MidiFacade facade) {
-        super(device, facade);
+    public MidiSink(MidiDevice device) {
+        super(device);
     }
 
     public void open() {

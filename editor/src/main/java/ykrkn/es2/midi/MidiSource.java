@@ -6,8 +6,8 @@ public class MidiSource extends MidiIO {
 
     MidiSubscriber subscriber;
 
-    public MidiSource(MidiDevice device, MidiFacade facade) {
-        super(device, facade);
+    public MidiSource(MidiDevice device) {
+        super(device);
     }
 
     public void open() {
@@ -27,14 +27,20 @@ public class MidiSource extends MidiIO {
     }
 
     public void unsubscribe() {
-        this.subscriber = (msg) -> {};
+        this.subscriber = new NullSubscriber();
     }
 
     private final class MidiInputReceiver implements MidiDeviceReceiver {
 
         public void send(MidiMessage msg, long timeStamp) {
-            // TODO: clock is here
-            if (msg.getMessage()[0] == -8) return;
+            int status = Byte.toUnsignedInt(msg.getMessage()[0]);
+            int filter = subscriber.statusFilter();
+            // TODO: filter by status
+            if (status == 248) return;
+            //if ((status & 0xF8) == 0xF8 && 0 == (filter & MidiSubscriber.REALTIME)) return;
+            //else if (status == 0xF0 && 0 == (filter & MidiSubscriber.SYSEX)) return;
+            //else if ((status & 0x70 >> 4) <= 6 && 0 == (filter & MidiSubscriber.CHANNEL)) return;
+
             System.out.println(MidiSource.this + " -> " + Utils.trace(msg));
             subscriber.onMessage(msg);
         }
@@ -45,6 +51,12 @@ public class MidiSource extends MidiIO {
         public MidiDevice getMidiDevice() {
             return device;
         }
+
+    }
+
+    private static final class NullSubscriber implements MidiSubscriber {
+        @Override public void onMessage(MidiMessage message) {}
+        @Override public int statusFilter() { return 0; }
     }
 
     @Override

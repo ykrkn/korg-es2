@@ -3,7 +3,6 @@ package ykrkn.es2.midi;
 import reactor.core.publisher.Mono;
 import struct.JavaStruct;
 import struct.StructClass;
-import struct.StructException;
 import struct.StructField;
 import ykrkn.es2.struct.PatternStruct;
 
@@ -16,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class ES2SysexService {
+public class ES2MidiService {
 
     private final MidiFacade midi;
 
@@ -26,7 +25,7 @@ public class ES2SysexService {
 
     private int globalChannel;
 
-    public ES2SysexService(MidiFacade midi) {
+    public ES2MidiService(MidiFacade midi) {
         this.midi = midi;
     }
 
@@ -70,7 +69,7 @@ public class ES2SysexService {
      */
     private final class PatternDump implements SysexExchange<PatternStruct>, MidiSubscriber {
 
-        private CompletableFuture future;
+        private CompletableFuture<PatternStruct> future;
 
         private final byte[] header = Utils.byteArray()
                 .append(Constants.SYSTEM_EXCLUSIVE)
@@ -98,28 +97,25 @@ public class ES2SysexService {
         public void onMessage(MidiMessage msg) {
             if (msg.getStatus() != SysexMessage.SYSTEM_EXCLUSIVE) return;
             byte[] ba = msg.getMessage();
-            byte[] h = Arrays.copyOfRange(ba, 1, 6);
-            if (!Arrays.equals(header, h)) return;
-
-            if (ba[6] == Constants.DATA_LOAD_ERROR_RES) {
-                future.completeExceptionally(new SysexActionError("DATA LOAD ERROR", ba[6]));
-                return;
-            }
-
-            if (ba[6] != Constants.CURRENT_PATTERN_DUMP_RES) {
-                future.completeExceptionally(new SysexActionError("ERROR", ba[6]));
-                return;
-            }
-
-            ba = Arrays.copyOfRange(ba, 7, ba.length-1);
-            ba = Utils.sysex2data(ba);
-            PatternStruct p = new PatternStruct();
+            if (!Arrays.equals(header, Arrays.copyOfRange(ba, 0, 6))) return;
 
             try {
+                if (ba[6] == Constants.DATA_LOAD_ERROR_RES) {
+                    throw new SysexActionError("DATA LOAD ERROR", ba[6]);
+                }
+
+                if (ba[6] != Constants.CURRENT_PATTERN_DUMP_RES) {
+                    throw new SysexActionError("ERROR", ba[6]);
+                }
+
+                ba = Arrays.copyOfRange(ba, 7, ba.length-1);
+                ba = Utils.sysex2data(ba);
+                PatternStruct p = new PatternStruct();
+
                 JavaStruct.unpack(p, ba, ByteOrder.LITTLE_ENDIAN);
                 p.validate();
                 future.complete(p);
-            } catch (StructException e) {
+            } catch (Exception e) {
                 future.completeExceptionally(e);
             }
         }
@@ -179,11 +175,38 @@ public class ES2SysexService {
 
         private SearchDevice() {
             future = new CompletableFuture<>();
-            subscribeAllSources();
+            midi.getSources().forEach(source -> source.subscribe(new SysexSubscriber(source)));
         }
 
-        private void subscribeAllSources() {
-            midi.getSources().forEach(source -> source.subscribe(msg -> {
+        @Override
+        public Mono<Boolean> request() {
+            midi.getSinks().forEach(sink -> {
+                int echo = (int)(127 * Math.random());
+                echo2sink.put(echo, sink);
+
+                byte[] ba = Utils.byteArray(header)
+                        .append(echo)
+                        .append(Constants.END_OF_EXCLUSIVE)
+                        .build();
+
+                MidiMessage msg = Utils.message(ba);
+                sink.send(msg);
+            });
+
+            return Mono.fromFuture(future)
+                    .timeout(Duration.ofSeconds(4), Mono.just(false));
+        }
+
+        private final class SysexSubscriber implements MidiSubscriber {
+
+            private final MidiSource source;
+
+            private SysexSubscriber(MidiSource source) {
+                this.source = source;
+            }
+
+            @Override
+            public void onMessage(MidiMessage msg) {
                 try {
                     if (msg.getStatus() != SysexMessage.SYSTEM_EXCLUSIVE) {
                         return;
@@ -208,7 +231,7 @@ public class ES2SysexService {
                     MidiSink sink = echo2sink.get(Byte.toUnsignedInt(s.echo));
 
                     if (sink == null) {
-                        throw new SysexExchangeError("Sink NOT Found " + s);
+                        throw new SysexExchangeException("Sink NOT Found " + s);
                     }
 
                     currentSource = source;
@@ -218,31 +241,14 @@ public class ES2SysexService {
                 } catch (Exception e) {
                     future.completeExceptionally(e);
                 } finally {
-                    if (currentSource != source) {
-                        source.unsubscribe();
-                    }
+                    source.unsubscribe();
                 }
-            }));
-        }
+            }
 
-
-        @Override
-        public Mono<Boolean> request() {
-            midi.getSinks().forEach(sink -> {
-                int echo = (int)(127 * Math.random());
-                echo2sink.put(echo, sink);
-
-                byte[] ba = Utils.byteArray(header)
-                        .append(echo)
-                        .append(Constants.END_OF_EXCLUSIVE)
-                        .build();
-
-                MidiMessage msg = Utils.message(ba);
-                sink.send(msg);
-            });
-
-            return Mono.fromFuture(future)
-                    .timeout(Duration.ofSeconds(4), Mono.just(false));
+            @Override
+            public int statusFilter() {
+                return SYSEX;
+            }
         }
     }
 

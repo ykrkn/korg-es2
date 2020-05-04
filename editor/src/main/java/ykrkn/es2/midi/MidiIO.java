@@ -6,15 +6,12 @@ abstract class MidiIO {
 
     protected final MidiDevice device;
 
-    protected final MidiFacade facade;
-
     public MidiDevice getDevice() {
         return device;
     }
 
-    protected MidiIO(MidiDevice device, MidiFacade facade) {
+    protected MidiIO(MidiDevice device) {
         this.device = device;
-        this.facade = facade;
     }
 
     public String getDescription() {

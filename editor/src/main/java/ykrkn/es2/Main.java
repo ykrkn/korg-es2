@@ -17,18 +17,18 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         MidiFacade midi = MidiFacade.start();
-        ES2SysexService service = new ES2SysexService(midi);
+        ES2MidiService service = new ES2MidiService(midi);
 
         service.start()
                 .flatMap(started -> started ? service.patternDump() : Mono.empty())
-                .log()
+                .doOnSuccess(System.out::println)
                 .subscribe();
     }
 
     public static void main2(String[] args) throws Exception {
         MidiFacade midi = MidiFacade.start();
-        MidiSource input = midi.findSource("nanoKONTROL2 SLIDER/KNOB");
-        MidiSink output = midi.findSink("nanoKONTROL2 CTRL");
+        MidiSource input = midi.findSource("nanoKONTROL2");
+        MidiSink output = midi.findSink("nanoKONTROL2");
 
         input.subscribe(msg -> {
             System.out.println(Utils.trace(msg));

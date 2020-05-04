@@ -1,58 +1,64 @@
 package ykrkn.es2.midi;
 
 import uk.co.xfactorylibrarians.coremidi4j.CoreMidiDeviceProvider;
+import uk.co.xfactorylibrarians.coremidi4j.CoreMidiException;
 
 import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class MidiFacade {
 
-    final static ExecutorService exec = Executors.newCachedThreadPool();
+    private final static Object monitor = new Object();
 
-    private final Set<MidiIO> io = new HashSet<>();
+    private static volatile MidiFacade instance;
 
-    public static MidiFacade start() throws MidiUnavailableException {
-        final MidiFacade instance = new MidiFacade();
-        MidiDevice.Info[] infos = CoreMidiDeviceProvider.getMidiDeviceInfo();
-        for (int i = 0; i < infos.length; i++) {
-            MidiDevice.Info info = infos[i];
-            System.out.println("==============");
-            System.out.println(info.getVendor());
-            System.out.println(info.getName());
-            System.out.println(info.getDescription());
-            System.out.println(info.getClass());
-
-            MidiDevice device = MidiSystem.getMidiDevice(info);
-            System.out.println(device.getMaxReceivers());
-            System.out.println(device.getMaxTransmitters());
-
-            if (device.getMaxTransmitters() != 0) {
-                instance.io.add(new MidiSource(device, instance));
-            }
-
-            if (device.getMaxReceivers() != 0) {
-                instance.io.add(new MidiSink(device, instance));
+    public static MidiFacade start() throws MidiSystemException {
+        synchronized (monitor) {
+            try {
+                if (instance == null) {
+                    instance = new MidiFacade();
+                    instance.startImpl();
+                    instance.watchMidi();
+                }
+                return instance;
+            } catch (CoreMidiException e) {
+                throw new MidiSystemException(e);
             }
         }
-        return instance;
+    }
+
+    private void watchMidi() throws CoreMidiException {
+        CoreMidiDeviceProvider.addNotificationListener(() -> System.out.println("The MIDI environment has changed."));
+    }
+
+    private void startImpl() {
+        getAvailableDevices().map(Utils::trace).forEach(System.out::println);
+    }
+
+    private Stream<MidiDevice> getAvailableDevices() {
+        return Stream.of(CoreMidiDeviceProvider.getMidiDeviceInfo()).map(info -> {
+            try {
+                return MidiSystem.getMidiDevice(info);
+            } catch (MidiUnavailableException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }).filter(Objects::nonNull);
     }
 
     public Stream<MidiSink> getSinks() {
-        return io.stream()
-                .filter(e -> MidiSink.class.isInstance(e))
-                .map(MidiSink.class::cast);
+        return getAvailableDevices()
+                .filter(device -> device.getMaxReceivers() != 0)
+                .map(device -> new MidiSink(device));
     }
 
     public Stream<MidiSource> getSources() {
-        return io.stream()
-                .filter(e -> MidiSource.class.isInstance(e))
-                .map(MidiSource.class::cast);
+        return getAvailableDevices()
+                .filter(device -> device.getMaxTransmitters() != 0)
+                .map(device -> new MidiSource(device));
     }
 
     public MidiSource findSource(String description) {
