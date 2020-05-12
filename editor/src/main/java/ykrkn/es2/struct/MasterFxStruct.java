@@ -1,5 +1,6 @@
 package ykrkn.es2.struct;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import struct.StructClass;
 import struct.StructField;
 
@@ -29,11 +30,11 @@ TABLE 4 : Master Fx Paramter
 @StructClass
 public class MasterFxStruct implements Serializable {
     private static final long serialVersionUID = 1L;
-    @StructField(order = 0) public byte pad1;
+    @StructField(order = 0) @JsonIgnore public byte pad1;
     @StructField(order = 1) public byte type;
     @StructField(order = 2) public byte x;
     @StructField(order = 3) public byte y;
-    @StructField(order = 4) public byte pad2;
+    @StructField(order = 4) @JsonIgnore public byte pad2;
     @StructField(order = 5) public byte hold;
-    @StructField(order = 6) public byte[] pad3 = new byte[2];
+    @StructField(order = 6) @JsonIgnore public byte[] pad3 = new byte[2];
 }

@@ -1,5 +1,6 @@
 package ykrkn.es2.struct;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import struct.StructClass;
 import struct.StructField;
 
@@ -28,10 +29,10 @@ import java.io.Serializable;
 @StructClass
 public class TouchScaleStruct implements Serializable {
     private static final long serialVersionUID = 1L;
-    @StructField(order = 0) public byte[] pad1 = new byte[5];
+    @StructField(order = 0) @JsonIgnore public byte[] pad1 = new byte[5];
     @StructField(order = 1) public byte gateArpPattern;
     @StructField(order = 2) public byte gateArpSpeed;
-    @StructField(order = 3) public byte pad2;
+    @StructField(order = 3) @JsonIgnore public byte pad2;
     @StructField(order = 4) public short gateArpTime;
-    @StructField(order = 5) public byte[] pad3 = new byte[6];
+    @StructField(order = 5) @JsonIgnore public byte[] pad3 = new byte[6];
 }

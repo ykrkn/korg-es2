@@ -1,5 +1,7 @@
 package ykrkn.es2.struct;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import struct.CString;
 import struct.StructClass;
 import struct.StructField;
@@ -94,9 +96,13 @@ public class PatternStruct implements Serializable {
     // 'PTST' = 54535450[HEX]
     @StructField(order = 0)  public int header;
     @StructField(order = 1)  public int size;
-    @StructField(order = 2)  public int pad1;
+    @StructField(order = 2)  @JsonIgnore public int pad1;
     @StructField(order = 3)  public int version;
-    @StructField(order = 4)  public CString name = new CString(18);
+
+    @StructField(order = 4)
+    @JsonSerialize(using = CStringSerializer.class)
+    public CString name = new CString(18);
+
     @StructField(order = 5)  public short tempo;
     @StructField(order = 6)  public byte swing;
     @StructField(order = 7)  public byte length;
@@ -105,15 +111,15 @@ public class PatternStruct implements Serializable {
     @StructField(order = 10) public byte scale;
     @StructField(order = 11) public byte chordset;
     @StructField(order = 12) public byte level;
-    @StructField(order = 13) public byte pad2;
+    @StructField(order = 13) @JsonIgnore public byte pad2;
     
     @StructField(order = 14) public TouchScaleStruct touchScale = new TouchScaleStruct();
     @StructField(order = 15) public MasterFxStruct masterFx = new MasterFxStruct();
     @StructField(order = 16) public byte alt1314;
     @StructField(order = 17) public byte alt1516;
-    @StructField(order = 18) public byte[] pad3 = new byte[186];
+    @StructField(order = 18) @JsonIgnore public byte[] pad3 = new byte[186];
     @StructField(order = 19) public MotionSeqStruct motionSeq = new MotionSeqStruct();
-    @StructField(order = 20) public byte[] pad4 = new byte[208];
+    @StructField(order = 20) @JsonIgnore public byte[] pad4 = new byte[208];
 
     @StructField(order = 21)
     public PartStruct[] parts = new PartStruct[] {
@@ -124,6 +130,7 @@ public class PatternStruct implements Serializable {
     };
 
     @StructField(order = 22)
+    @JsonIgnore
     public byte[] pad5 = new byte[252];
 
     @StructField(order = 23)

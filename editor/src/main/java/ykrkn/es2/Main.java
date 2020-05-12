@@ -1,5 +1,8 @@
 package ykrkn.es2;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import reactor.core.publisher.Mono;
 import ykrkn.es2.api.SampleService;
 import ykrkn.es2.midi.*;
@@ -21,7 +24,18 @@ public class Main {
 
         service.start()
                 .flatMap(started -> started ? service.patternDump() : Mono.empty())
-                .doOnSuccess(System.out::println)
+                .doOnSuccess(e -> {
+                    ObjectMapper om = new ObjectMapper();
+                    om.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+                    
+                    try {
+                        om.writeValue(Paths.get("src/test/resources/pattern.json").toFile(), e);
+                    } catch (JsonProcessingException ex) {
+                        ex.printStackTrace();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                })
                 .subscribe();
     }
 

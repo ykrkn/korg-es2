@@ -1,5 +1,7 @@
 package ykrkn.es2.struct;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import struct.StructClass;
 import struct.StructField;
 
@@ -23,6 +25,10 @@ public class StepStruct {
     @StructField(order = 1) public byte gateTime;
     @StructField(order = 2) public byte velocity;
     @StructField(order = 3) public byte triggerEnabled;
-    @StructField(order = 4) public byte[] notes = new byte[4];
-    @StructField(order = 5) public int pad2;
+
+    @StructField(order = 4)
+    @JsonSerialize(using = NByteArraySerializer.class)
+    public byte[] notes = new byte[4];
+
+    @StructField(order = 5) @JsonIgnore public int pad2;
 }

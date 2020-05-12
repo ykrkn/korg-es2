@@ -1,5 +1,6 @@
 package ykrkn.es2.struct;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import struct.StructClass;
 import struct.StructField;
 
@@ -104,9 +105,9 @@ public class PartStruct implements Serializable {
     @StructField(order = 4)  public byte padVelocity;
     @StructField(order = 5)  public byte scaleMode;
     @StructField(order = 6)  public byte priority;
-    @StructField(order = 7)  public byte pad1;
+    @StructField(order = 7)  @JsonIgnore public byte pad1;
     @StructField(order = 8)  public short oscType;
-    @StructField(order = 9)  public byte pad2;
+    @StructField(order = 9)  @JsonIgnore public byte pad2;
     @StructField(order = 10) public byte oscEdit;
     @StructField(order = 11) public byte filterType;
     @StructField(order = 12) public byte filterCutoff;
@@ -115,24 +116,24 @@ public class PartStruct implements Serializable {
     @StructField(order = 15) public byte modType;
     @StructField(order = 16) public byte modSpeed;
     @StructField(order = 17) public byte modDepth;
-    @StructField(order = 18) public byte pad3;
+    @StructField(order = 18) @JsonIgnore public byte pad3;
     @StructField(order = 19) public byte EGAttack;
     @StructField(order = 20) public byte EGDecRel;
-    @StructField(order = 21) public short pad4;
+    @StructField(order = 21) @JsonIgnore public short pad4;
     @StructField(order = 22) public byte ampLevel;
     @StructField(order = 23) public byte ampPan;
     @StructField(order = 24) public byte EGEnabled;
     @StructField(order = 25) public byte MFXEnabled;
     @StructField(order = 26) public byte grooveType;
     @StructField(order = 27) public byte grooveDepth;
-    @StructField(order = 28) public short pad5;
+    @StructField(order = 28) @JsonIgnore public short pad5;
     @StructField(order = 29) public byte IFXEnabled;
     @StructField(order = 30) public byte IFXType;
     @StructField(order = 31) public byte IFXEdit;
-    @StructField(order = 32) public byte pad6;
+    @StructField(order = 32) @JsonIgnore public byte pad6;
     @StructField(order = 33) public byte oscPitch;
     @StructField(order = 34) public byte oscGlide;
-    @StructField(order = 35) public byte[] pad7 = new byte[10];
+    @StructField(order = 35) @JsonIgnore public byte[] pad7 = new byte[10];
 
     @StructField(order = 36) public StepStruct[] steps = new StepStruct[64];
 

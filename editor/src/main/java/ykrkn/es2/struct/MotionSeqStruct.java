@@ -1,5 +1,6 @@
 package ykrkn.es2.struct;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import struct.StructClass;
 import struct.StructField;
 
@@ -27,5 +28,7 @@ TABLE 5 :Motion Sequence Parameter
 @StructClass
 public class MotionSeqStruct implements Serializable {
     private static final long serialVersionUID = 1L;
-    @StructField(order = 0) public byte[] pad = new byte[1584];
+    @StructField(order = 0)
+    @JsonIgnore
+    public byte[] pad = new byte[1584];
 }
