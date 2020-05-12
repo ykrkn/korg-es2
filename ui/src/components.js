@@ -186,22 +186,6 @@ const PatternDetails = ({data, onChange}) => {
         </div>
 
         <div className='item'>
-          <legend>ALT 13/14</legend>
-          <BooleanInput 
-            value={types.bool(data.alt_1314)} 
-            onChange={(v) => onChange('alt_1314', v)} />
-        </div>
-        
-        <div className='item'>
-          <legend>ALT 15/16</legend>
-          <BooleanInput 
-            value={types.bool(data.alt_1516)} 
-            onChange={(v) => onChange('alt_1516', v)} />
-        </div>
-    </div>
-
-    <div className='col'>
-      <div className='item'>
           <legend>Key</legend>
           <Selector 
             values={keyMap} 
@@ -247,7 +231,21 @@ const PatternDetails = ({data, onChange}) => {
             value={127-types.byte(data.level)} min={0} max={127}
             onChange={(v) => onChange('level', 127-v)} />
         </div>
-    </div>        
+
+        <div className='item'>
+          <legend>ALT 13/14</legend>
+          <BooleanInput 
+            value={types.bool(data.alt_1314)} 
+            onChange={(v) => onChange('alt_1314', v)} />
+        </div>
+        
+        <div className='item'>
+          <legend>ALT 15/16</legend>
+          <BooleanInput 
+            value={types.bool(data.alt_1516)} 
+            onChange={(v) => onChange('alt_1516', v)} />
+        </div>
+    </div>       
 
 {/* ['name',18], // null terminated
 ['tempo',2], // 200~3000 = 20.0 ~ 300.0 UInt16LE
@@ -380,9 +378,9 @@ class Part extends Component {
           <div className='label'>&nbsp;</div>,
           <div className='label'>&nbsp;</div>,
           <div className='label'>Velocity</div>,
-          <div className='label'>Gate Time</div>,
-          <div className='label'>Step Enabled</div>,
-          <div className='label'>Trigger Enabled</div>,
+          <div className='label'>Gate</div>,
+          <div className='label'>Step</div>,
+          <div className='label'>Trigger</div>,
         ] : null;
 
         return <div className="Part">

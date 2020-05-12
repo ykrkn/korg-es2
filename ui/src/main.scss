@@ -48,10 +48,10 @@ button {
 }
 
 $pad-width: 40px;
-$pad-height: 40px;
+$pad-height: 26px;
 
 .Pattern {
-  width: 800px;
+  // width: 800px;
   .pattern-menu {
     display: flex;
     button {
@@ -107,7 +107,7 @@ $pad-height: 40px;
       flex-direction: column;
   
       button.toggle {
-        width: 128px;
+        width: 48px;
         height: $pad-height;
         font-size: 20px;
   
