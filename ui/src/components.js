@@ -1,18 +1,8 @@
 import React, { Component } from 'react';
-import { KorgES2Pattern } from './korg-es2';
 import { Pattern } from './Pattern';
+import { NotesMap } from './constants';
 
-const service = new KorgES2Pattern();
-
-export const NumberInput = ({value, onChange, onClick, labelRenderer, backgroundRenderer}) => {
-
-  const wheel = ({deltaY}) => {
-    if (undefined === onChange) return; 
-    const dy = deltaY >> 2;
-    if (dy > 0) value--;
-    if (dy < 0) value++;    
-    onChange(value);
-  }
+export const NumberInput = ({value, min, max, onChange, backgroundRenderer}) => {
 
   const style = {};
 
@@ -21,9 +11,23 @@ export const NumberInput = ({value, onChange, onClick, labelRenderer, background
     if (bgcolor !== null) style.backgroundColor = bgcolor;    
   }
 
-  const label = labelRenderer ? labelRenderer(value) : value;
+  return (<input type='number' 
+                  className='number' 
+                  style={style} 
+                  value={value} 
+                  min={min} max={max}
+                  onChange={(e) => onChange(e.target.value)} />);
+}
 
-  return (<button className='number' style={style} onClick={onClick} onWheel = {wheel}>{label}</button>);
+export const note2str = (v) => {
+  if (v === 0) return '---';
+  let n = ((v - 1) % 12);
+  let o = Math.floor(v/11)-1;
+  return NotesMap[n] + o;
+};
+
+export const NoteInput = ({value, onChange}) => {
+  return (<button className='note'>{note2str(value)}</button>);
 }
 
 export class TextInput extends Component {
@@ -92,7 +96,7 @@ export class Selector extends Component {
 
 
 
-class App extends Component {
+export class App extends Component {
 
   constructor(props) {
     super(props);
@@ -100,29 +104,13 @@ class App extends Component {
   }
 
   async componentDidMount() {
-    const response = await fetch('/ds.json');
-    const json = await response.json();
-    // 138 - 2 bars, 243 - init
-    const id = Math.round(Math.random()*json.length); 
-    console.log("Pattern " + id);
-    
-    service.loadAllPatternsDump(json[id]);
-    window.s = service;
-    this.setState({pattern : service.data});
+    const pattern = await this.props.service.loadPattern();
+    this.setState({pattern});
   }
 
   render() {
     const { pattern } = this.state;
     if (!pattern) return null;
-    return (
-      <div>
-        <header>
-          <button onClick={this.getDataset}>get</button>
-        </header>
-        <Pattern data={pattern} />
-      </div>
-    );
+    return (<Pattern data={pattern} />);
   }
-}
-
-export default App;
+};

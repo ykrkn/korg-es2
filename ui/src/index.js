@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './main.scss';
-import App from './components';
+import { App } from './components';
+import service from './service';
 
-import unregister from './registerServiceWorker';
+ReactDOM.render(<App service={service} />, document.getElementById('root'));
 
-ReactDOM.render(<App />, document.getElementById('root'));
-unregister();
+// 724x640

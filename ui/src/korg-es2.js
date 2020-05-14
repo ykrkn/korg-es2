@@ -233,14 +233,6 @@ const types = {
     bool  : (val) => val[0] !== 0,
     byte  : (val) => val[0],
     short : (val) => (((val[1] & 0xFF) << 8) | (val[0] & 0xFF)),
-    string : (val) => {
-        let r = '';
-        for(let i=0; i<val.length; ++i) {
-            if (val[i] === 0) break;
-            r += String.fromCharCode(val[i]);
-        }
-        return r;
-    }
 };
 
 export { KorgES2Pattern, types };

@@ -61,14 +61,14 @@ export class Part extends Component {
         const steps = data.steps.slice(firstStep, firstStep+16);   
         
         const stepLabels = selected ? [
-          <div className='label'>&nbsp;</div>,
-          <div className='label'>&nbsp;</div>,
-          <div className='label'>&nbsp;</div>,
-          <div className='label'>&nbsp;</div>,
-          <div className='label'>Velocity</div>,
-          <div className='label'>Gate</div>,
-          <div className='label'>Step</div>,
-          <div className='label'>Trigger</div>,
+          <div key={'1'} className='label'>&nbsp;</div>,
+          <div key={'2'} className='label'>&nbsp;</div>,
+          <div key={'3'} className='label'>&nbsp;</div>,
+          <div key={'4'} className='label'>&nbsp;</div>,
+          <div key={'5'} className='label'>Velocity</div>,
+          <div key={'6'} className='label'>Gate</div>,
+          <div key={'7'} className='label'>Step</div>,
+          <div key={'8'} className='label'>Trigger</div>,
         ] : null;
 
         return <div className="Part">

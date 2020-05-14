@@ -47,6 +47,16 @@ button {
   }
 }
 
+input[type=number] {
+  outline: 0;
+  margin: 1px;
+
+  &:hover {
+    background: #537100;
+    color: black;
+  }
+}
+
 $pad-width: 40px;
 $pad-height: 26px;
 
@@ -54,6 +64,7 @@ $pad-height: 26px;
   // width: 800px;
   .pattern-menu {
     display: flex;
+    margin: 8px 0;
     button {
       min-width: 32px;
       height: 27px;
@@ -62,6 +73,13 @@ $pad-height: 26px;
       &.selected {
         background:#9c0186;
       }
+    }
+    .header {
+      height: 27px;
+      margin: 1px;
+      line-height: 28px;
+      font-size: 2em;
+      margin-left: 12px;
     }
     .sizer {
       flex-grow: 1;
@@ -142,10 +160,10 @@ $pad-height: 26px;
     
       .number {
         border: none;
-        height: 16px;
+        width: $pad-width;
       }
 
-      .toggle {
+      .toggle, .note, .number {
         height: 16px;
       }
     }
