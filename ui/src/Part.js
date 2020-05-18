@@ -56,8 +56,20 @@ export class Part extends Component {
         };
     }
 
+    static getDerivedStateFromProps(props, state) {      
+      if (state.data !== props.data) {
+        const { data } = props; 
+        const s = { ... data};
+        s.data = data;
+        return s;
+      }
+
+      return null;
+    }
+
     render() {
-        const { data, firstStep, selected, idx, onSelect } = this.props;
+        const { firstStep, selected, idx, onSelect } = this.props;
+        const { data } = this.state;
         const steps = data.steps.slice(firstStep, firstStep+16);   
         
         const stepLabels = selected ? [
@@ -77,7 +89,7 @@ export class Part extends Component {
                     { stepLabels } 
                     {/* { selected ? <PartDetails data={data} /> : null }  */}
                   </div>
-                  {steps.map((e, i) => <PartStep key={i} idx={firstStep+i} data={e} selected={selected} />)}
+                  {steps.map((e, i) => <PartStep key={i} partIdx={idx} idx={firstStep+i} data={e} selected={selected} />)}
         </div>;
     }
 }

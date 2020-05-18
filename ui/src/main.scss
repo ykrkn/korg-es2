@@ -1,3 +1,8 @@
+$pad-width: 40px;
+$pad-height: 26px;
+$slider-octave-thumb-color: #176b9c;
+$slider-note-thumb-color: #2abb1c;
+
 body {
   margin: 0;
   padding: 0;
@@ -11,6 +16,98 @@ body {
   color: #9a9a9a;
   box-sizing: border-box;
 }
+
+// http://danielstern.ca/range.css/#/ 
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  margin: -1px 0;
+  border: none;
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 10px;
+  cursor: pointer;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.01), 0px 0px 1px rgba(13, 13, 13, 0.01);
+  background: #4f4d4f;
+  border-radius: 25px;
+  border: 0px solid #010101;
+}
+input[type=range]::-webkit-slider-thumb {
+  box-shadow: 0px 0px 0px #ff0000, 0px 0px 0px #ff1a1a;
+  border: 0px solid rgba(0, 0, 0, 0);
+  height: 8px;
+  width: 8px;
+  border-radius: 8px;
+  background: $slider-note-thumb-color;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: 1px;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: #5c5a5c;
+}
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 10px;
+  cursor: pointer;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.01), 0px 0px 1px rgba(13, 13, 13, 0.01);
+  background: #4f4d4f;
+  border-radius: 25px;
+  border: 0px solid #010101;
+}
+input[type=range]::-moz-range-thumb {
+  box-shadow: 0px 0px 0px #ff0000, 0px 0px 0px #ff1a1a;
+  border: 0px solid rgba(0, 0, 0, 0);
+  height: 8px;
+  width: 8px;
+  border-radius: 8px;
+  background: $slider-note-thumb-color;
+  cursor: pointer;
+}
+input[type=range]::-ms-track {
+  width: 100%;
+  height: 10px;
+  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+  background: #424042;
+  border: 0px solid #010101;
+  border-radius: 50px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.01), 0px 0px 1px rgba(13, 13, 13, 0.01);
+}
+input[type=range]::-ms-fill-upper {
+  background: #4f4d4f;
+  border: 0px solid #010101;
+  border-radius: 50px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.01), 0px 0px 1px rgba(13, 13, 13, 0.01);
+}
+input[type=range]::-ms-thumb {
+  box-shadow: 0px 0px 0px #ff0000, 0px 0px 0px #ff1a1a;
+  border: 0px solid rgba(0, 0, 0, 0);
+  width: 8px;
+  border-radius: 8px;
+  background: $slider-note-thumb-color;
+  cursor: pointer;
+  height: 8px;
+}
+input[type=range]:focus::-ms-fill-lower {
+  background: #4f4d4f;
+}
+input[type=range]:focus::-ms-fill-upper {
+  background: #5c5a5c;
+}
+
+input[type=range].octave-slider::-webkit-slider-thumb{background: $slider-octave-thumb-color;}
+input[type=range].octave-slider::-ms-thumb {background: $slider-octave-thumb-color;}
+input[type=range].octave-slider::-moz-range-thumb{background: $slider-octave-thumb-color;}
 
 select {
   appearance: none;
@@ -39,26 +136,18 @@ button {
   &.selected {
     background: #9100ff;
   }
-
-  &.number:hover {
-    cursor: ns-resize;
-    background: #95cc00;
-    color: black;
-  }
 }
 
 input[type=number] {
   outline: 0;
   margin: 1px;
-
-  &:hover {
+  padding:0;
+  &.selected {
     background: #537100;
     color: black;
+    text-align: center;
   }
 }
-
-$pad-width: 40px;
-$pad-height: 26px;
 
 .Pattern {
   // width: 800px;
@@ -78,7 +167,7 @@ $pad-height: 26px;
       height: 27px;
       margin: 1px;
       line-height: 28px;
-      font-size: 2em;
+      font-size: 1.4em;
       margin-left: 12px;
     }
     .sizer {
@@ -139,13 +228,22 @@ $pad-height: 26px;
         margin: 1px;
         height: 16px;
         padding-right: 4px;
+
+        &:nth-child(-n+5) {
+          background: #45461c;
+        }
        }
     }
 
     .PartStep {
       display: flex;
       flex-direction: column;
-    
+      position: relative;
+
+      &:nth-child(4n-2) {
+        background: #252225;
+      }
+
       .pad {
         width:$pad-width; 
         height: $pad-height;
@@ -159,12 +257,37 @@ $pad-height: 26px;
       }
     
       .number {
-        border: none;
         width: $pad-width;
+        height: 15px;
       }
 
-      .toggle, .note, .number {
+      .toggle, .note {
         height: 16px;
+      }
+
+      .note.selected {
+        background: #537100;
+        color: black;
+      }
+
+      .note-slider-wrapper {
+        display: inline-block;
+        padding: 0;
+        position: absolute;
+        top: 113px;
+        left: -14px;
+        height: $pad-width + 3;
+        background: #383838;
+        border-radius: 4px;
+        z-index:1;
+        transform: rotate(-90deg);
+        padding-top:8px;
+
+        input[type=range] {
+          width: 69px;
+          height: 12px;
+          margin: 0;
+        }
       }
     }
   }

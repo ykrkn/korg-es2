@@ -1,15 +1,16 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { Part } from './Part';
 import { PatternBeatMap, NotesMap, PatternChordsetMap, PatternScaleMap } from './constants';
 import { TextInput, NumberInput, Selector, BooleanInput } from './components';
 import { types } from './korg-es2';
+import service from './service';
 
-const PatternDetails = ({data, onChange}) => {
-    const beatMap = PatternBeatMap;
-    const keyMap = NotesMap;
-    const scaleMap = PatternScaleMap.reduce((acc, x) => { acc[x[0]] = x[1]; return acc; }, {});
-    const chordsetMap = PatternChordsetMap;
-  
+const scaleMap = PatternScaleMap.reduce((acc, x) => { acc[x[0]] = x[1]; return acc; }, {});
+const beatMap = PatternBeatMap;
+const keyMap = NotesMap;    
+const chordsetMap = PatternChordsetMap;
+
+const PatternDetails = ({data, onChange}) => {  
     return <div className='pattern-details'>
       <div className='col'>
         <div className='item'>
@@ -60,7 +61,7 @@ const PatternDetails = ({data, onChange}) => {
     </div>
   }
 
-export class Pattern extends Component {
+export class Pattern extends PureComponent {
 
     static DetailsView = 1;
     static PartsView = 2;
@@ -106,15 +107,17 @@ export class Pattern extends Component {
     }
 
     onChangePatternProperty = (pname, value) => {
-      console.log(pname, value);
       if (pname == 'alt1314' || pname == 'alt1516') {
           value = 1*value;
       } else if (pname == 'length') {
           value -= 1;
+      } else if (['key', 'beat', 'chordset', 'scale'].indexOf(pname) != -1) {
+        value = parseInt(value);
       }
+
       const { data } = this.state;
       data[pname] = value;
-      //debugger;
+      service.changePattern({[pname]:value});
       this.setState(data);
     }
 
@@ -125,6 +128,7 @@ export class Pattern extends Component {
 
       return (<div className='Pattern'>
         <div className='pattern-menu'>
+        {this.props.menuItems}  
         <button onClick={() => this.setState({viewState : Pattern.DetailsView})}
             className={(viewState === Pattern.DetailsView ? 'selected' : null)}>&#9776;</button>
           <button onClick={() => this.setState({viewState : Pattern.PartsView})}
@@ -133,7 +137,7 @@ export class Pattern extends Component {
             className={(viewState === Pattern.MotionsView ? 'selected' : null)}>Motions</button> */}
           {viewState === Pattern.PartsView || viewState === Pattern.MotionsView 
             ? arr.map(idx => this.renderBarButton(idx)) : null}
-          <div className='header'>{data.name} / {data.tempo*.1}bpm</div>  
+          <div className='header'>{data.name} {data.tempo*.1}bpm {keyMap[data.key]} {scaleMap[data.scale]}</div>  
         </div>
           {viewState === Pattern.DetailsView ? <PatternDetails data={data} onChange={this.onChangePatternProperty} /> : null}
           {viewState === Pattern.PartsView ? parts.map((e, i) => this.renderPart(e, i)) : null}
