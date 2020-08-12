@@ -4,6 +4,7 @@ import pattern from './pattern.json';
 class ServiceWebpack {
     constructor() {
         this.pattern = null;
+        this.onPatternUpdatedCallback = (pattern) => {};
     }
 
     async loadPattern() {
@@ -30,6 +31,11 @@ class ServiceWebpack {
             ...this.pattern, 
             parts : this.pattern.parts.map((p,i) => i === partIdx ? {...p, steps : p.steps.map((s,j) => j === stepIdx ? {...s, ...obj} : s)} : p)};
         this.pattern = pattern;
+        this.onPatternUpdatedCallback(pattern);
+    }
+
+    onPatternUpdated(callback) {
+        this.onPatternUpdatedCallback = callback;
     }
 }
 

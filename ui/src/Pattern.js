@@ -83,8 +83,8 @@ export class Pattern extends PureComponent {
         const { data } = props; 
         return {
           data : data,
-          selectedBar : 0,
-          selectedPart : 0,
+          // selectedBar : 0,
+          // selectedPart : 0,
         };
       }
       return null;
@@ -128,7 +128,6 @@ export class Pattern extends PureComponent {
 
       return (<div className='Pattern'>
         <div className='pattern-menu'>
-        {this.props.menuItems}  
         <button onClick={() => this.setState({viewState : Pattern.DetailsView})}
             className={(viewState === Pattern.DetailsView ? 'selected' : null)}>&#9776;</button>
           <button onClick={() => this.setState({viewState : Pattern.PartsView})}

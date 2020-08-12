@@ -1,5 +1,6 @@
-$pad-width: 40px;
-$pad-height: 26px;
+$pad-width: 48px;
+$pad-height: 32px;
+$row-height: 24px;
 $slider-octave-thumb-color: #176b9c;
 $slider-note-thumb-color: #2abb1c;
 
@@ -16,98 +17,6 @@ body {
   color: #9a9a9a;
   box-sizing: border-box;
 }
-
-// http://danielstern.ca/range.css/#/ 
-
-input[type=range] {
-  -webkit-appearance: none;
-  width: 100%;
-  margin: -1px 0;
-  border: none;
-}
-input[type=range]:focus {
-  outline: none;
-}
-input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 10px;
-  cursor: pointer;
-  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.01), 0px 0px 1px rgba(13, 13, 13, 0.01);
-  background: #4f4d4f;
-  border-radius: 25px;
-  border: 0px solid #010101;
-}
-input[type=range]::-webkit-slider-thumb {
-  box-shadow: 0px 0px 0px #ff0000, 0px 0px 0px #ff1a1a;
-  border: 0px solid rgba(0, 0, 0, 0);
-  height: 8px;
-  width: 8px;
-  border-radius: 8px;
-  background: $slider-note-thumb-color;
-  cursor: pointer;
-  -webkit-appearance: none;
-  margin-top: 1px;
-}
-input[type=range]:focus::-webkit-slider-runnable-track {
-  background: #5c5a5c;
-}
-input[type=range]::-moz-range-track {
-  width: 100%;
-  height: 10px;
-  cursor: pointer;
-  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.01), 0px 0px 1px rgba(13, 13, 13, 0.01);
-  background: #4f4d4f;
-  border-radius: 25px;
-  border: 0px solid #010101;
-}
-input[type=range]::-moz-range-thumb {
-  box-shadow: 0px 0px 0px #ff0000, 0px 0px 0px #ff1a1a;
-  border: 0px solid rgba(0, 0, 0, 0);
-  height: 8px;
-  width: 8px;
-  border-radius: 8px;
-  background: $slider-note-thumb-color;
-  cursor: pointer;
-}
-input[type=range]::-ms-track {
-  width: 100%;
-  height: 10px;
-  cursor: pointer;
-  background: transparent;
-  border-color: transparent;
-  color: transparent;
-}
-input[type=range]::-ms-fill-lower {
-  background: #424042;
-  border: 0px solid #010101;
-  border-radius: 50px;
-  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.01), 0px 0px 1px rgba(13, 13, 13, 0.01);
-}
-input[type=range]::-ms-fill-upper {
-  background: #4f4d4f;
-  border: 0px solid #010101;
-  border-radius: 50px;
-  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.01), 0px 0px 1px rgba(13, 13, 13, 0.01);
-}
-input[type=range]::-ms-thumb {
-  box-shadow: 0px 0px 0px #ff0000, 0px 0px 0px #ff1a1a;
-  border: 0px solid rgba(0, 0, 0, 0);
-  width: 8px;
-  border-radius: 8px;
-  background: $slider-note-thumb-color;
-  cursor: pointer;
-  height: 8px;
-}
-input[type=range]:focus::-ms-fill-lower {
-  background: #4f4d4f;
-}
-input[type=range]:focus::-ms-fill-upper {
-  background: #5c5a5c;
-}
-
-input[type=range].octave-slider::-webkit-slider-thumb{background: $slider-octave-thumb-color;}
-input[type=range].octave-slider::-ms-thumb {background: $slider-octave-thumb-color;}
-input[type=range].octave-slider::-moz-range-thumb{background: $slider-octave-thumb-color;}
 
 select {
   appearance: none;
@@ -207,31 +116,55 @@ input[type=number] {
   }
 
   .Part {
-    display: flex;
-  
-    .part-menu {
+    .pads {
       display: flex;
-      flex-direction: column;
-  
+
       button.toggle {
-        width: 48px;
-        height: $pad-height;
-        font-size: 20px;
-  
+        width:$pad-width;
+        font-size:12px;
+
+        &:nth-child(1) {
+          height: $pad-height;
+          font-size: 20px;
+        }
+
         &.selected {
           background:#4a6d27;
         }
       }
-  
+    }
+
+    .pad {
+      width:$pad-width;
+      height: $pad-height;
+      padding: 0;
+      margin: 1px;
+      color:#adadad;
+      border-radius: 4px;
+      outline: 0;
+      border: 1px solid rgb(138, 138, 138);
+    }
+
+    .steps {
+
+    }
+
+    .row {
+      > * {
+        width:$pad-width;
+        height: $row-height;
+      }
+    }
+
+    .part-menu {
+      display: flex;
+      flex-direction: column;
+
       .label {
         text-align: right;
         margin: 1px;
         height: 16px;
         padding-right: 4px;
-
-        &:nth-child(-n+5) {
-          background: #45461c;
-        }
        }
     }
 
@@ -244,17 +177,7 @@ input[type=number] {
         background: #252225;
       }
 
-      .pad {
-        width:$pad-width; 
-        height: $pad-height;
-        font-size:12px;
-        padding: 0;
-        margin: 1px;
-        color:#adadad;
-        border-radius: 4px;
-        outline: 0;
-        border: 1px solid rgb(138, 138, 138);
-      }
+
     
       .number {
         width: $pad-width;
@@ -268,26 +191,6 @@ input[type=number] {
       .note.selected {
         background: #537100;
         color: black;
-      }
-
-      .note-slider-wrapper {
-        display: inline-block;
-        padding: 0;
-        position: absolute;
-        top: 113px;
-        left: -14px;
-        height: $pad-width + 3;
-        background: #383838;
-        border-radius: 4px;
-        z-index:1;
-        transform: rotate(-90deg);
-        padding-top:8px;
-
-        input[type=range] {
-          width: 69px;
-          height: 12px;
-          margin: 0;
-        }
       }
     }
   }

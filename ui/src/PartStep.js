@@ -1,9 +1,12 @@
 import React, { PureComponent } from 'react';
-import { NumberInput, NoteInput, BooleanInput, note2str } from './components';
+import {NumberInput, NoteInput, BooleanInput, note2str} from './components';
 import service from './service';
 
 const sortnum = (a, b) => a-b;
 
+/**
+ * @Deprecated
+ */
 export class PartStep extends PureComponent {
     constructor(props) {
         super(props);

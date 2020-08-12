@@ -1,7 +1,4 @@
 import React, { PureComponent } from 'react';
-import { Pattern } from './Pattern';
-import { NotesMap } from './constants';
-import service from './service';
 
 export class NumberInput extends PureComponent {
   constructor(props) {
@@ -23,69 +20,11 @@ export class NumberInput extends PureComponent {
     const { selected } = this.state; 
     const cn = ['number', selected ? 'selected' : ''].join(' ');
     return (selected 
-      ? <input type='number' autoFocus={true} min={min} max={max} onChange={(e) => this.onChange(e.target.value)} value={value} className={cn} onBlur={() => this.setState({selected:false})}/> 
+      ? <input type='number' autoFocus={true} min={min} max={max} value={value} className={cn}
+               onChange={(e) => this.onChange(e.target.value)}
+               onBlur={() => this.setState({selected:false})} />
       : <button onClick={() => this.setState({selected:true})}>{value}</button>
-      );
-  }
-}
-
-export const note2str = (v) => {
-  if (v === 0) return '---';
-  let n = ((v - 1) % 12);
-  let o = Math.floor((v-1)/12);//Math.floor(v/11)-1;
-  return NotesMap[n] + (o-1);
-};
-
-export class NoteInput extends PureComponent {
-  constructor(props) {
-    super(props); 
-    this.state = {
-      initialValue : 0,
-      changed : false
-    }
-  }
-
-  // 0,1~128=Off,Note No 0~127
-
-  setOctaveWithNote(octave, note) {
-    this.setState({changed:true});
-    if (octave == -1) {
-      this.props.onChange(note);
-      return;  
-    } 
-
-    let v = note + 1 + (octave*12);
-    if (v > 128) v = 128;
-    //console.log(`o=${octave} n=${note} v=${v} n=${note2str(v)}`);
-    this.props.onChange(v);
-  }
-
-  onSelect() {
-    this.props.onSelect();
-  }
-
-  render() {
-    const { value, selected } = this.props;
-    
-    const cn = ['note', selected ? 'selected' : ''].join(' ');
-
-    const c = [<button className={cn} 
-        onClick={() => this.onSelect()}>
-    {note2str(value)}</button>];
-
-    if (selected) {
-      const note = (value-1)%12;
-      const octave = Math.floor((value-1)/12);
-
-      c.push(<div className='note-slider-wrapper'>
-        <input type='range' className={'octave-slider'} min={-1} max={10} title='Octave'
-            onChange={(e) => this.setOctaveWithNote(parseInt(e.target.value), note)} value={octave}/>
-        <input type='range' min={0} max={11} title='Note'
-            onChange={(e) => this.setOctaveWithNote(octave, parseInt(e.target.value))} value={note}/>
-      </div>);
-    }
-    
-    return c;
+    );
   }
 }
 
@@ -112,6 +51,65 @@ export class TextInput extends PureComponent {
 
   render() {
     return <input maxLength={18} value={this.state.value} onChange={(e) => this.onChange(e.target.value)} />
+  }
+}
+
+export class KnobNumericInput extends PureComponent {
+
+  constructor(props) {
+    super(props);
+    this.state = {capture : false};
+    this.x = this.y = this.dx = this.dy = 0;
+  }
+
+  down = (e) => {
+    //console.log('down', e);
+    this.setState({capture : true});
+    this.x = e.pageX;
+    this.y = e.pageY;
+    this.dx = e.pageX;
+    this.dy = e.pageY;
+    e.target.setPointerCapture(e.pointerId);
+  };
+
+  up = (e) => {
+    //console.log('up', e);
+    this.setState({capture : false});
+    e.target.releasePointerCapture(e.pointerId);
+  };
+
+  move = (e) => {
+    if (!this.state.capture) return;
+    let { value, min, max } = this.props;
+    this.dx = this.x - e.pageX;
+    this.dy = this.y - e.pageY;
+    this.x = e.pageX;
+    this.y = e.pageY;
+    if (this.dy > 0) value++;
+    if (this.dy < 0) value--;
+
+    if (min !== undefined && value < min) value = min;
+    if (max !== undefined && value > max) value = max;
+    this.setState({value});
+    if (undefined === this.props.onChange) return;
+    this.props.onChange(value);
+  };
+
+  noClick = (e) => {};
+
+  render() {
+    const {value, labelRenderer} = this.props;
+    const cn = [this.props.className];
+    if (this.state.capture) cn.push('selected');
+    let label = value;
+    if (labelRenderer !== undefined) {
+      label = labelRenderer(label);
+    }
+    return (<button className={cn.join(' ')}
+                    onClick={this.props.onClick || this.noClick}
+                    onPointerDown={this.down}
+                    onPointerUp={this.up}
+                    onPointerMove={this.move}>{label}</button>);
   }
 }
 
@@ -156,24 +154,3 @@ export class Selector extends PureComponent {
       }</select>
   }
 }
-
-export class App extends PureComponent {
-
-  constructor(props) {
-    super(props);
-    this.menuItems = [];
-    this.state = {};
-  }
-
-  async componentDidMount() {
-    this.menuItems.push(<button onClick={() => service.savePattern()}>S</button>);
-    const pattern = await service.loadPattern();
-    this.setState({pattern});
-  }
-
-  render() {
-    const { pattern } = this.state;
-    if (!pattern) return null;
-    return (<Pattern data={pattern} menuItems={this.menuItems} />);
-  }
-};
