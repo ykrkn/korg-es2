@@ -43,7 +43,8 @@ button {
   margin: 1px;
   padding:0;
   &.selected {
-    background: #9100ff;
+    background: #4a6d27;
+    color: black;
   }
 }
 
@@ -68,9 +69,6 @@ input[type=number] {
       height: 27px;
       margin: 1px;
       padding: 4px 8px;
-      &.selected {
-        background:#9c0186;
-      }
     }
     .header {
       height: 27px;
@@ -114,88 +112,54 @@ input[type=number] {
       }
     }
   }
+}
 
-  .Part {
-    .pads {
-      display: flex;
+.Part {
 
-      button.toggle {
-        width:$pad-width;
-        font-size:12px;
+  .pads {
+    display: flex;
 
-        &:nth-child(1) {
-          height: $pad-height;
-          font-size: 20px;
-        }
-
-        &.selected {
-          background:#4a6d27;
-        }
-      }
-    }
-
-    .pad {
+    button.toggle {
       width:$pad-width;
-      height: $pad-height;
-      padding: 0;
-      margin: 1px;
-      color:#adadad;
-      border-radius: 4px;
-      outline: 0;
-      border: 1px solid rgb(138, 138, 138);
-    }
+      font-size:12px;
 
-    .steps {
-
-    }
-
-    .row {
-      > * {
-        width:$pad-width;
-        height: $row-height;
-      }
-    }
-
-    .part-menu {
-      display: flex;
-      flex-direction: column;
-
-      .label {
-        text-align: right;
-        margin: 1px;
-        height: 16px;
-        padding-right: 4px;
-       }
-    }
-
-    .PartStep {
-      display: flex;
-      flex-direction: column;
-      position: relative;
-
-      &:nth-child(4n-2) {
-        background: #252225;
-      }
-
-
-    
-      .number {
-        width: $pad-width;
-        height: 15px;
-      }
-
-      .toggle, .note {
-        height: 16px;
-      }
-
-      .note.selected {
-        background: #537100;
-        color: black;
+      &:nth-child(1) {
+        font-size: 20px;
       }
     }
   }
-}
 
+  .pad {
+    width:$pad-width;
+    height: $pad-height;
+    padding: 0;
+    margin: 1px;
+    color:#adadad;
+    border-radius: 4px;
+    outline: 0;
+    border: 1px solid rgb(138, 138, 138);
+  }
+
+  .row {
+    display: flex;
+    > * {
+      width:$pad-width;
+      height: $row-height;
+    }
+  }
+
+  .part-menu {
+    display: flex;
+    flex-direction: column;
+
+    .label {
+      text-align: right;
+      margin: 1px;
+      height: 16px;
+      padding-right: 4px;
+    }
+  }
+}
 
 .PartDetails {
   background: rgb(79, 77, 79);

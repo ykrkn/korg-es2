@@ -100,10 +100,6 @@ export class Part extends Component {
         this.changeStep(stepIdx, {notes});
     };
 
-    onChangeVelocity = (stepIdx, value) => {
-        this.changeStep(stepIdx, {velocity : value});
-    };
-
     onChangeGateTime = (stepIdx, value) => {
         if (value > 96 && value < 125) value = 127;
         else if (value > 125 && value < 127) value = 96;
@@ -122,6 +118,7 @@ export class Part extends Component {
                                                        onChange={value => this.onChangeNote(firstStep+i, 0, value)}
                                                        labelRenderer={note2str}/>)}
             </div>
+
             <div className='row'>
                 <button className='toggle'>Note 2</button>
                 {steps.map((e, i) => <KnobNumericInput key={i} value={e.notes[1]} min={0} max={128}
@@ -129,6 +126,7 @@ export class Part extends Component {
                                                        onChange={value => this.onChangeNote(firstStep+i, 1, value)}
                                                        labelRenderer={note2str}/>)}
             </div>
+
             <div className='row'>
                 <button className='toggle'>Note 3</button>
                 {steps.map((e, i) => <KnobNumericInput key={i} value={e.notes[2]} min={0} max={128}
@@ -136,6 +134,7 @@ export class Part extends Component {
                                                        onChange={value => this.onChangeNote(firstStep+i, 2, value)}
                                                        labelRenderer={note2str}/>)}
             </div>
+
             <div className='row'>
                 <button className='toggle'>Note 4</button>
                 {steps.map((e, i) => <KnobNumericInput key={i} value={e.notes[3]} min={0} max={128}
@@ -148,7 +147,7 @@ export class Part extends Component {
                 <button className='toggle'>Velocity</button>
                 {steps.map((e, i) => <KnobNumericInput key={i} value={e.velocity} min={1} max={127}
                                                        className={'step velocity'}
-                                                       onChange={value => this.onChangeVelocity(firstStep+i, value)}/>)}
+                                                       onChange={velocity => this.changeStep(firstStep+i, {velocity})}/>)}
             </div>
 
             <div className='row'>
@@ -170,14 +169,17 @@ export class Part extends Component {
     render() {
         const { firstStep, data, selected, idx, onSelect } = this.props;
         const steps = data.steps.slice(firstStep, firstStep + 16);
+        const initValues = {notes:[0,0,0,0], enabled: 0, triggerEnabled: 0, velocity: 96, gateTime: 72};
+        const cn = ['Part'];
+        if (selected) cn.push('selected');
 
-        return <div className="Part">
+        return <div className={cn.join(' ')}>
                 <div className='pads'>
-                    <button onClick={() => onSelect(idx)} className={'toggle' + (selected ? ' selected' : '')}>{(1+idx)}</button>
+                    <button onClick={() => onSelect(idx)} className={'toggle'}>{(1+idx)}</button>
                     {steps.map((e, i) => <PadButton key={i} idx={firstStep+i} data={e}
                                                     selected={selected}
                                                     onClick={() => this.changeStep(firstStep+i, {enabled : 1*!e.enabled})}
-                                                    onDoubleClick={() => this.changeStep(firstStep+i, {notes:[0,0,0,0], enabled: 0, triggerEnabled: 0, velocity: 96, gateTime: 72})} />)}
+                                                    onDoubleClick={() => this.changeStep(firstStep+i, initValues)} />)}
                 </div>
                 {selected ? this.renderSteps() : null}
         </div>;
